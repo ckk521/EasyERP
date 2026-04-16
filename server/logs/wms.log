@@ -1,0 +1,270 @@
+2026-04-11 14:15:27.939 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication using Java 11.0.30 on ckk001 with PID 38524 (D:\IT\EasyERP\server\target\classes started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 14:15:27.939 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 14:15:27.940 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 14:15:27.940 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 14:15:28.484 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 14:15:28.485 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 14:15:28.485 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 14:15:28.521 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 14:15:28.538 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 14:15:28.954 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 0d00a3f9-e892-4a9b-8e72-9387e160ab55
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 14:15:28.985 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6467ddc7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@27b337bb, org.springframework.security.web.context.SecurityContextPersistenceFilter@4b033eac, org.springframework.security.web.header.HeaderWriterFilter@5f9f3e58, org.springframework.security.web.authentication.logout.LogoutFilter@79afa369, com.wms.system.filter.JwtAuthenticationFilter@2bfb583b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@45a1d057, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@51a16adf, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@59636c47, org.springframework.security.web.session.SessionManagementFilter@61e86192, org.springframework.security.web.access.ExceptionTranslationFilter@19da993b, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@553d2579]
+2026-04-11 14:15:29.116 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 14:15:29.128 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 1.402 seconds (JVM running for 1.534)
+2026-04-11 14:15:41.139 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 14:15:49.707 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 14:15:49.756 [http-nio-8080-exec-4] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 14:44:47.101 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication using Java 11.0.30 on ckk001 with PID 22696 (D:\IT\EasyERP\server\target\classes started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 14:44:47.100 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 14:44:47.102 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 14:44:47.102 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 14:44:47.646 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 14:44:47.647 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 14:44:47.647 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 14:44:47.683 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 14:44:47.701 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 14:44:48.112 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: fcec33c6-decb-4a4e-bbc8-5e1bc2199922
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 14:44:48.152 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@b5b9333, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@52b959df, org.springframework.security.web.context.SecurityContextPersistenceFilter@87d9a01, org.springframework.security.web.header.HeaderWriterFilter@50fdf44f, org.springframework.security.web.authentication.logout.LogoutFilter@23e3f5cd, com.wms.system.filter.JwtAuthenticationFilter@2daf06fc, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@10177794, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@e5c2463, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@38588dea, org.springframework.security.web.session.SessionManagementFilter@3c19592c, org.springframework.security.web.access.ExceptionTranslationFilter@c1e14f, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@7aaad0]
+2026-04-11 14:44:48.275 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 14:44:48.287 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 1.39 seconds (JVM running for 1.523)
+2026-04-11 14:45:49.892 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 14:45:49.979 [http-nio-8080-exec-3] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 14:45:50.037 [http-nio-8080-exec-3] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 15:06:37.453 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication using Java 11.0.30 on ckk001 with PID 30712 (D:\IT\EasyERP\server\target\classes started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 15:06:37.454 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 15:06:37.455 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 15:06:37.456 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 15:06:38.007 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 15:06:38.008 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 15:06:38.008 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 15:06:38.042 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 15:06:38.060 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 15:06:38.467 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 1a0c9c60-9404-4631-8d7f-8e1cf49022ae
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 15:06:38.506 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@608cd501, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3b97907c, org.springframework.security.web.context.SecurityContextPersistenceFilter@52d0f583, org.springframework.security.web.header.HeaderWriterFilter@e5c2463, org.springframework.security.web.authentication.logout.LogoutFilter@261de205, com.wms.system.filter.JwtAuthenticationFilter@6aa3bfc, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@12d40609, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@76437e9b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@59096b66, org.springframework.security.web.session.SessionManagementFilter@385d819, org.springframework.security.web.access.ExceptionTranslationFilter@3c19592c, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@3cdff901]
+2026-04-11 15:06:38.628 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 15:06:38.640 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 1.384 seconds (JVM running for 1.518)
+2026-04-11 15:06:53.891 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 15:06:53.968 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 15:06:54.016 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 15:06:54.156 [http-nio-8080-exec-2] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=apptest2, password=Test@123, name=App Test, phone=13900000002, email=apptest@test.com, roleId=2, warehouseId=null, status=null)
+2026-04-11 15:06:54.166 [http-nio-8080-exec-2] INFO  com.wms.system.service.UserService - User count check for username apptest2: 0
+2026-04-11 15:06:54.216 [http-nio-8080-exec-2] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=apptest2, password=$2a$10$aEtfdgMqfCI5.RhKwDTrXODrl5n6itw02CO26VOGNgTUQLOhP5RNS, name=App Test, phone=13900000002, email=apptest@test.com, roleId=2, warehouseId=null, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T15:06:54.216529400, updateUser=null, updateTime=2026-04-11T15:06:54.216529400)
+2026-04-11 15:06:54.228 [http-nio-8080-exec-2] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 10
+2026-04-11 15:14:44.858 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication using Java 11.0.30 on ckk001 with PID 37224 (D:\IT\EasyERP\server\target\classes started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 15:14:44.858 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 15:14:44.860 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 15:14:44.861 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 15:14:45.403 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 15:14:45.404 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 15:14:45.404 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 15:14:45.438 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 15:14:45.456 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 15:14:45.859 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: db2bf6c6-459b-41e9-ba29-29fee33845e6
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 15:14:45.897 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3cdff901, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@57e5396b, org.springframework.security.web.context.SecurityContextPersistenceFilter@61e86192, org.springframework.security.web.header.HeaderWriterFilter@c2df90e, org.springframework.security.web.authentication.logout.LogoutFilter@7f97bc14, com.wms.system.filter.JwtAuthenticationFilter@31e130bf, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1320e68a, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4b033eac, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2f054f70, org.springframework.security.web.session.SessionManagementFilter@b6bccb4, org.springframework.security.web.access.ExceptionTranslationFilter@2c30c81d, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@b5b9333]
+2026-04-11 15:14:46.016 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 15:14:46.029 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 1.381 seconds (JVM running for 1.511)
+2026-04-11 15:17:43.187 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 15:17:43.255 [http-nio-8080-exec-3] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 15:17:43.339 [http-nio-8080-exec-3] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 15:19:33.995 [http-nio-8080-exec-3] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=testuser99, password=Test@123, name=Test User, phone=13900000099, email=test99@test.com, roleId=2, warehouseId=null, status=null)
+2026-04-11 15:19:34.002 [http-nio-8080-exec-3] INFO  com.wms.system.service.UserService - User count check for username testuser99: 0
+2026-04-11 15:19:34.055 [http-nio-8080-exec-3] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=testuser99, password=$2a$10$O9f41tqeQw24e83O93R/fefdAsxY0h5D5qx6Kf8xRdfPX15UUq95y, name=Test User, phone=13900000099, email=test99@test.com, roleId=2, warehouseId=null, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T15:19:34.055063100, updateUser=null, updateTime=2026-04-11T15:19:34.055063100)
+2026-04-11 15:19:34.065 [http-nio-8080-exec-3] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 11
+2026-04-11 15:19:46.745 [http-nio-8080-exec-6] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=proxyuser1, password=Test@123, name=Proxy User, phone=13911111111, email=proxy@test.com, roleId=2, warehouseId=null, status=null)
+2026-04-11 15:19:46.746 [http-nio-8080-exec-6] INFO  com.wms.system.service.UserService - User count check for username proxyuser1: 0
+2026-04-11 15:19:46.797 [http-nio-8080-exec-6] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=proxyuser1, password=$2a$10$p0n4mPHv.NarEgTJr2aHXuLknGuf7hV5Kzqtt0IsNE6xRixeAHKSS, name=Proxy User, phone=13911111111, email=proxy@test.com, roleId=2, warehouseId=null, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T15:19:46.797640400, updateUser=null, updateTime=2026-04-11T15:19:46.797640400)
+2026-04-11 15:19:46.798 [http-nio-8080-exec-6] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 12
+2026-04-11 15:41:37.830 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=ckk001, password=111111, name=大强, phone=13982938222, email=22@qq.com, roleId=1, warehouseId=9, status=null)
+2026-04-11 15:41:37.831 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - User count check for username ckk001: 0
+2026-04-11 15:41:37.882 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=ckk001, password=$2a$10$ML0OTLtZ9vAOsvUkv53iRO32tueXNCYOeOgMp1Wbt/sLjFKQL/hlG, name=大强, phone=13982938222, email=22@qq.com, roleId=1, warehouseId=9, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T15:41:37.882002400, updateUser=null, updateTime=2026-04-11T15:41:37.882002400)
+2026-04-11 15:41:37.883 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 13
+2026-04-11 15:49:45.384 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=ckk002, password=111111, name=刘新民, phone=13982382911, email=22@q.c, roleId=3, warehouseId=9, status=null)
+2026-04-11 15:49:45.385 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - User count check for username ckk002: 0
+2026-04-11 15:49:45.438 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=ckk002, password=$2a$10$GHjz5kz2OUOK/puX4OIk1uVnafN/cpKkCuUT9tQKn/h1O7mKrlJWC, name=刘新民, phone=13982382911, email=22@q.c, roleId=3, warehouseId=9, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T15:49:45.438451900, updateUser=null, updateTime=2026-04-11T15:49:45.438451900)
+2026-04-11 15:49:45.439 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 14
+2026-04-11 16:17:11.410 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 16:17:11.417 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 22052 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 16:17:11.418 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 16:17:11.418 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 16:17:12.467 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:12.468 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 16:17:12.468 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 16:17:12.517 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 16:17:12.561 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 16:17:13.255 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: f32d387d-c5c2-43b7-a651-6bb236f19426
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 16:17:13.319 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3fcdcf, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7668d560, org.springframework.security.web.context.SecurityContextPersistenceFilter@66b72664, org.springframework.security.web.header.HeaderWriterFilter@25243bc1, org.springframework.security.web.authentication.logout.LogoutFilter@5aa360ea, com.wms.system.filter.JwtAuthenticationFilter@29e6eb25, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@58cd06cb, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3be8821f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@46292372, org.springframework.security.web.session.SessionManagementFilter@420bc288, org.springframework.security.web.access.ExceptionTranslationFilter@315df4bb, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@6d2260db]
+2026-04-11 16:17:13.743 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:13.753 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8080 is already in use
+2026-04-11 16:17:13.762 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Pausing ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:13.762 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2026-04-11 16:17:13.767 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Stopping ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:13.767 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Destroying ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:13.804 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
+2026-04-11 16:17:33.113 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 16:17:33.121 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 36392 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 16:17:33.121 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 16:17:33.121 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 16:17:34.185 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:34.193 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 16:17:34.193 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 16:17:34.247 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 16:17:34.296 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 16:17:34.982 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 5fe0bf86-a939-41c6-9991-e5bf4ccc5be3
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 16:17:35.070 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6c44052e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5c371e13, org.springframework.security.web.context.SecurityContextPersistenceFilter@64b31700, org.springframework.security.web.header.HeaderWriterFilter@467f77a5, org.springframework.security.web.authentication.logout.LogoutFilter@1556f2dd, com.wms.system.filter.JwtAuthenticationFilter@269f4bad, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@bae47a0, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@74a9c4b0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@530a8454, org.springframework.security.web.session.SessionManagementFilter@7a34b7b8, org.springframework.security.web.access.ExceptionTranslationFilter@25243bc1, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@3fcdcf]
+2026-04-11 16:17:35.527 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:17:35.569 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 2.867 seconds (JVM running for 3.153)
+2026-04-11 16:17:51.139 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 16:17:55.854 [http-nio-8080-exec-2] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 16:17:55.945 [http-nio-8080-exec-2] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 16:18:29.569 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 16:18:29.572 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 38232 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 16:18:29.573 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 16:18:29.573 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 16:18:30.605 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:18:30.607 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 16:18:30.607 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 16:18:30.652 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 16:18:30.704 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 16:18:31.420 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: b729a14d-abd4-4980-a405-e6053b17303a
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 16:18:31.487 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1e34c607, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@5215cd9a, org.springframework.security.web.context.SecurityContextPersistenceFilter@74a9c4b0, org.springframework.security.web.header.HeaderWriterFilter@df5f5c0, org.springframework.security.web.authentication.logout.LogoutFilter@49bd54f7, com.wms.system.filter.JwtAuthenticationFilter@339bf286, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1c05a54d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@65ef722a, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@36b6964d, org.springframework.security.web.session.SessionManagementFilter@64b31700, org.springframework.security.web.access.ExceptionTranslationFilter@4201a617, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@126be319]
+2026-04-11 16:18:31.932 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:18:31.982 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 2.819 seconds (JVM running for 3.107)
+2026-04-11 16:18:46.485 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 16:18:46.609 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 16:18:46.722 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 16:19:15.188 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 16:19:15.191 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 40640 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 16:19:15.192 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 16:19:15.192 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 16:19:16.230 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:19:16.232 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 16:19:16.232 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 16:19:16.280 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 16:19:16.320 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 16:19:16.993 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: fb874a89-060b-43ff-91f2-b0350306e549
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 16:19:17.058 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@5215cd9a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@36b6964d, org.springframework.security.web.context.SecurityContextPersistenceFilter@85ec632, org.springframework.security.web.header.HeaderWriterFilter@308a6984, org.springframework.security.web.authentication.logout.LogoutFilter@6b5f8707, com.wms.system.filter.JwtAuthenticationFilter@38be305c, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@65ef722a, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5fd9b663, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@31198ceb, org.springframework.security.web.session.SessionManagementFilter@3b65e559, org.springframework.security.web.access.ExceptionTranslationFilter@467f77a5, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@6c44052e]
+2026-04-11 16:19:17.454 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 16:19:17.504 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 2.733 seconds (JVM running for 2.998)
+2026-04-11 16:19:30.253 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 16:19:30.374 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 16:19:30.479 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 23:23:41.513 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 23:23:41.517 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 36484 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 23:23:41.518 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 23:23:41.518 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 23:23:42.575 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:23:42.585 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 23:23:42.585 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 23:23:42.641 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 23:23:42.692 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 23:23:43.492 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 248ee6ca-41d0-494e-aefb-14d1ff25261f
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 23:23:43.566 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@530a8454, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1e34c607, org.springframework.security.web.context.SecurityContextPersistenceFilter@bae47a0, org.springframework.security.web.header.HeaderWriterFilter@420bc288, org.springframework.security.web.authentication.logout.LogoutFilter@62577d6, com.wms.system.filter.JwtAuthenticationFilter@38be305c, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@85ec632, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1c05a54d, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5215cd9a, org.springframework.security.web.session.SessionManagementFilter@3be8821f, org.springframework.security.web.access.ExceptionTranslationFilter@2e6ee0bc, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@46292372]
+2026-04-11 23:23:43.966 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:23:44.036 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 3.074 seconds (JVM running for 3.368)
+2026-04-11 23:23:48.754 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 23:23:48.892 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 23:23:49.009 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 23:25:41.133 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - createUser called with dto: UserDTO(id=null, username=admin002, password=111111, name=大管家, phone=13800138001, email=test@test1.com, roleId=7, warehouseId=9, status=null)
+2026-04-11 23:25:41.150 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - User count check for username admin002: 0
+2026-04-11 23:25:41.195 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - About to insert user: SysUser(id=null, username=admin002, password=$2a$10$/XiG4jy5m/Tcd8IjTvQx2umkoSK3uBvm6hBb7qRZFO/Sqz2s1jpBm, name=大管家, phone=13800138001, email=test@test1.com, roleId=7, warehouseId=9, status=1, lastLoginTime=null, lastLoginIp=null, createUser=null, createTime=2026-04-11T23:25:41.195206200, updateUser=null, updateTime=2026-04-11T23:25:41.195206200)
+2026-04-11 23:25:41.210 [http-nio-8080-exec-7] INFO  com.wms.system.service.UserService - Insert result: 1, user id after insert: 15
+2026-04-11 23:46:18.275 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 23:46:18.279 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 42672 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 23:46:18.279 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 23:46:18.279 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 23:46:19.304 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:46:19.305 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 23:46:19.305 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 23:46:19.353 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 23:46:19.395 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 23:46:19.985 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: b903c0a8-7b58-412f-b70c-c524ebfb8321
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 23:46:20.045 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7668d560, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@46292372, org.springframework.security.web.context.SecurityContextPersistenceFilter@7a34b7b8, org.springframework.security.web.header.HeaderWriterFilter@1e287667, org.springframework.security.web.authentication.logout.LogoutFilter@6548bb7d, com.wms.system.filter.JwtAuthenticationFilter@5d018107, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3be8821f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@64b31700, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@126be319, org.springframework.security.web.session.SessionManagementFilter@df5f5c0, org.springframework.security.web.access.ExceptionTranslationFilter@3fc08eec, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@1f2d2181]
+2026-04-11 23:46:20.382 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:46:20.424 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 2.523 seconds (JVM running for 2.807)
+2026-04-11 23:46:25.671 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 23:46:25.787 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 23:46:25.879 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-04-11 23:51:41.757 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+2026-04-11 23:51:41.762 [main] INFO  com.wms.system.WmsSystemApplication - Starting WmsSystemApplication v1.0.0 using Java 11.0.30 on ckk001 with PID 39452 (D:\IT\EasyERP\server\target\wms-system-1.0.0.jar started by Administrator in D:\IT\EasyERP\server)
+2026-04-11 23:51:41.763 [main] DEBUG com.wms.system.WmsSystemApplication - Running with Spring Boot v2.7.18, Spring v5.3.31
+2026-04-11 23:51:41.763 [main] INFO  com.wms.system.WmsSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-04-11 23:51:42.793 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:51:42.795 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-04-11 23:51:42.795 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-04-11 23:51:42.843 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-04-11 23:51:42.886 [main] DEBUG com.wms.system.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-04-11 23:51:43.564 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 98be78bd-d7d5-4cd5-9beb-cb8a8de35603
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-11 23:51:43.622 [main] INFO  o.s.security.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3d9fc57a, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@d4ab71a, org.springframework.security.web.context.SecurityContextPersistenceFilter@6548bb7d, org.springframework.security.web.header.HeaderWriterFilter@1c05a54d, org.springframework.security.web.authentication.logout.LogoutFilter@117632cf, com.wms.system.filter.JwtAuthenticationFilter@62435e70, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@54336c81, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@1556f2dd, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3b4ef7, org.springframework.security.web.session.SessionManagementFilter@1c4ee95c, org.springframework.security.web.access.ExceptionTranslationFilter@3b65e559, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@aa5455e]
+2026-04-11 23:51:44.011 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-04-11 23:51:44.055 [main] INFO  com.wms.system.WmsSystemApplication - Started WmsSystemApplication in 2.683 seconds (JVM running for 2.951)
+2026-04-11 23:51:49.147 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-11 23:51:49.271 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-04-11 23:51:49.367 [http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
