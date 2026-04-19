@@ -1,5 +1,6 @@
 package com.wms.system.controller;
 
+import com.wms.system.annotation.OperationLog;
 import com.wms.system.common.Result;
 import com.wms.system.dto.PageDTO;
 import com.wms.system.dto.RoleDTO;
@@ -40,30 +41,35 @@ public class RoleController {
     }
 
     @PostMapping
+    @OperationLog(module = "角色管理", action = "CREATE", description = "创建角色")
     public Result<Map<String, Object>> createRole(@Valid @RequestBody RoleDTO dto) {
         Long id = roleService.createRole(dto);
         return Result.success("角色创建成功", Map.of("id", id));
     }
 
     @PutMapping("/{id}")
+    @OperationLog(module = "角色管理", action = "UPDATE", description = "更新角色")
     public Result<Void> updateRole(@PathVariable Long id, @Valid @RequestBody RoleDTO dto) {
         roleService.updateRole(id, dto);
         return Result.success("角色信息已更新", null);
     }
 
     @DeleteMapping("/{id}")
+    @OperationLog(module = "角色管理", action = "DELETE", description = "删除角色")
     public Result<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
         return Result.success("角色已删除", null);
     }
 
     @PatchMapping("/{id}/enable")
+    @OperationLog(module = "角色管理", action = "ENABLE", description = "启用角色")
     public Result<Void> enableRole(@PathVariable Long id) {
         roleService.enableRole(id);
         return Result.success("角色已启用", null);
     }
 
     @PatchMapping("/{id}/disable")
+    @OperationLog(module = "角色管理", action = "DISABLE", description = "停用角色")
     public Result<Void> disableRole(@PathVariable Long id) {
         roleService.disableRole(id);
         return Result.success("角色已停用", null);

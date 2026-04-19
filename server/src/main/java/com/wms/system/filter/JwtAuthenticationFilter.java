@@ -30,6 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = claims.getSubject();
             Long userId = claims.get("userId", Long.class);
 
+            // 设置 username 到 request 属性，供 OperationLogAspect 使用
+            request.setAttribute("username", username);
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userId,
