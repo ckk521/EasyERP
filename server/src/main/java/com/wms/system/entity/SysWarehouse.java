@@ -18,6 +18,12 @@ public class SysWarehouse {
 
     private Integer type;
 
+    /**
+     * 存储类型（支持多选，逗号分隔）：1-常温 2-冷藏 3-冷冻 4-恒温 5-混合
+     * 混合仓库可配置多种存储类型，如 "1,2,3" 表示支持常温、冷藏、冷冻
+     */
+    private String storageTypes;
+
     private String country;
 
     private String province;

@@ -1,13 +1,16 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import Root from "./Root";
 import Dashboard from "./pages/Dashboard";
-import WarehouseList from "./pages/base-data/WarehouseList";
-import LocationList from "./pages/base-data/LocationList";
+import WarehouseManagement from "./pages/base-data/WarehouseManagement";
 import ProductList from "./pages/base-data/ProductList";
 import SupplierList from "./pages/base-data/SupplierList";
+import SupplierProductList from "./pages/base-data/SupplierProductList";
 import CustomerList from "./pages/base-data/CustomerList";
 import InboundList from "./pages/inbound/InboundList";
 import InboundDetail from "./pages/inbound/InboundDetail";
+import ReceivePage from "./pages/inbound/ReceivePage";
+import InspectPage from "./pages/inbound/InspectPage";
+import PutawayPage from "./pages/inbound/PutawayPage";
 import OutboundList from "./pages/outbound/OutboundList";
 import WaveList from "./pages/outbound/WaveList";
 import InventoryList from "./pages/inventory/InventoryList";
@@ -41,39 +44,42 @@ export const router = createBrowserRouter([
     Component: Root,
     children: [
       { index: true, Component: Dashboard },
-      
+
       // 基础数据
-      { path: "base/warehouse", Component: WarehouseList },
-      { path: "base/location", Component: LocationList },
+      { path: "base/warehouse", Component: WarehouseManagement },
       { path: "base/product", Component: ProductList },
       { path: "base/supplier", Component: SupplierList },
+      { path: "base/supplier-product", Component: SupplierProductList },
       { path: "base/customer", Component: CustomerList },
-      
+
       // 入库管理
       { path: "inbound/list", Component: InboundList },
       { path: "inbound/:id", Component: InboundDetail },
-      
+      { path: "inbound/receive", Component: ReceivePage },
+      { path: "inbound/inspect", Component: InspectPage },
+      { path: "inbound/putaway", Component: PutawayPage },
+
       // 出库管理
       { path: "outbound/list", Component: OutboundList },
       { path: "outbound/wave", Component: WaveList },
-      
+
       // 库存管理
       { path: "inventory/list", Component: InventoryList },
       { path: "inventory/stocktake", Component: StocktakeList },
       { path: "inventory/transfer", Component: TransferList },
-      
+
       // 报表分析
       { path: "reports/overview", Component: ReportOverview },
-      
+
       // 退换货
       { path: "return/list", Component: ReturnList },
-      
+
       // 系统管理
       { path: "system/user", Component: UserList },
       { path: "system/role", Component: RoleList },
       { path: "system/config", Component: SystemConfig },
       { path: "system/log", Component: OperationLog },
-      
+
       { path: "*", Component: NotFound },
     ],
   },

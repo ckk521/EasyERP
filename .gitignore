@@ -1,1 +1,7 @@
 node_modules
+server/logs/
+server/target/
+test-results/
+*.log
+*.class
+*.jar

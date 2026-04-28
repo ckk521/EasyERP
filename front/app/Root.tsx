@@ -18,9 +18,9 @@ const menuItems = [
     icon: Warehouse,
     children: [
       { title: "仓库管理", path: "/base/warehouse" },
-      { title: "库位管理", path: "/base/location" },
       { title: "商品管理", path: "/base/product" },
       { title: "供应商", path: "/base/supplier" },
+      { title: "供应商商品", path: "/base/supplier-product" },
       { title: "客户管理", path: "/base/customer" },
     ]
   },
@@ -29,6 +29,9 @@ const menuItems = [
     icon: Package,
     children: [
       { title: "入库单", path: "/inbound/list" },
+      { title: "收货作业", path: "/inbound/receive" },
+      { title: "验收作业", path: "/inbound/inspect" },
+      { title: "上架作业", path: "/inbound/putaway" },
     ]
   },
   {

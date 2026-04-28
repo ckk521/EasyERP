@@ -1,6 +1,7 @@
 package com.wms.system.filter;
 
 import com.wms.system.util.JwtUtil;
+import com.wms.system.util.UserContext;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,6 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = claims.getSubject();
             Long userId = claims.get("userId", Long.class);
 
+            // 设置用户上下文
+            UserContext userContext = new UserContext();
+            userContext.setUserId(userId);
+            userContext.setUsername(username);
+            UserContext.set(userContext);
+
             // 设置 username 到 request 属性，供 OperationLogAspect 使用
             request.setAttribute("username", username);
 
@@ -43,7 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // 清理用户上下文
+            UserContext.clear();
+        }
     }
 
     private String extractToken(HttpServletRequest request) {
