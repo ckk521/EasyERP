@@ -14,6 +14,7 @@ import PutawayPage from "./pages/inbound/PutawayPage";
 import OutboundList from "./pages/outbound/OutboundList";
 import WaveList from "./pages/outbound/WaveList";
 import InventoryList from "./pages/inventory/InventoryList";
+import InventoryManagement from "./pages/inventory/InventoryManagement";
 import StocktakeList from "./pages/inventory/StocktakeList";
 import TransferList from "./pages/inventory/TransferList";
 import ReportOverview from "./pages/reports/ReportOverview";
@@ -64,7 +65,8 @@ export const router = createBrowserRouter([
       { path: "outbound/wave", Component: WaveList },
 
       // 库存管理
-      { path: "inventory/list", Component: InventoryList },
+      { path: "inventory/list", Component: InventoryManagement },
+      { path: "inventory/management", Component: InventoryManagement },
       { path: "inventory/stocktake", Component: StocktakeList },
       { path: "inventory/transfer", Component: TransferList },
 

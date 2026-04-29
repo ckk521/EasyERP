@@ -116,6 +116,14 @@ public class InspectService {
         record.setInspectUserName(username != null ? username : "操作员");
         inspectRecordRepository.insert(record);
 
+        // 更新入库单明细的批次号和效期信息
+        if (batchNo != null) {
+            item.setBatchNo(batchNo);
+            item.setProductionDate(dto.getProductionDate());
+            item.setExpiryDate(dto.getExpiryDate());
+            itemRepository.updateById(item);
+        }
+
         // 记录不合格品
         if (dto.getRejectedQty() != null && dto.getRejectedQty() > 0) {
             createRejectRecord(order, item, dto, userId);
