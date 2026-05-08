@@ -117,6 +117,7 @@ export default function InspectPage() {
   const [currentItem, setCurrentItem] = useState<InboundOrderItem | null>(null);
   const [qualifiedQty, setQualifiedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
+  const [rejectType, setRejectType] = useState<number>(0);
   const [rejectReason, setRejectReason] = useState("");
   const [inspectMode, setInspectMode] = useState<"full" | "partial">("full"); // 验收模式：全部/部分
 
@@ -174,6 +175,7 @@ export default function InspectPage() {
     const remaining = item.receivedQty - (item.qualifiedQty || 0) - (item.rejectedQty || 0);
     setQualifiedQty(remaining); // 默认全部验收
     setRejectedQty(0);
+    setRejectType(0);
     setRejectReason("");
     setInspectMode("full"); // 默认全部验收模式
     setInspectModalOpen(true);
@@ -217,6 +219,11 @@ export default function InspectPage() {
       return;
     }
 
+    if (rejectedQty > 0 && !rejectType) {
+      toast.error("请选择不合格类型");
+      return;
+    }
+
     setLoading(true);
     try {
       await fetchApi("/api/v1/inbound/inspect/execute", {
@@ -226,6 +233,7 @@ export default function InspectPage() {
           itemId: currentItem.id,
           qualifiedQty,
           rejectedQty,
+          rejectType,
           rejectReason,
         }),
       });
@@ -583,22 +591,33 @@ export default function InspectPage() {
                 </div>
 
                 {rejectedQty > 0 && (
-                  <div>
-                    <Label>不合格原因 *</Label>
-                    <select
-                      className="w-full mt-1 px-3 py-2 border rounded text-sm"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                    >
-                      <option value="">选择不合格原因</option>
-                      <option value="包装破损">包装破损</option>
-                      <option value="商品损坏">商品损坏</option>
-                      <option value="规格不符">规格不符</option>
-                      <option value="效期问题">效期问题</option>
-                      <option value="质量问题">质量问题</option>
-                      <option value="其他">其他</option>
-                    </select>
-                  </div>
+                  <>
+                    <div>
+                      <Label>不合格类型 *</Label>
+                      <select
+                        className="w-full mt-1 px-3 py-2 border rounded text-sm"
+                        value={rejectType}
+                        onChange={(e) => setRejectType(Number(e.target.value))}
+                      >
+                        <option value={0}>选择不合格类型</option>
+                        <option value={1}>包装破损</option>
+                        <option value={2}>商品损坏</option>
+                        <option value={3}>错货</option>
+                        <option value={4}>规格不符</option>
+                        <option value={5}>效期问题</option>
+                        <option value={6}>其他</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>不合格原因 *</Label>
+                      <Input
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="请输入不合格原因"
+                        className="mt-1"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             );

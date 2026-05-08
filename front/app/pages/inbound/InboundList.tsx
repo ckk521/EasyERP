@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Eye, Edit, Trash2, RotateCcw, XCircle, ChevronDown, AlertCircle } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, RotateCcw, XCircle, ChevronDown, AlertCircle, Link2, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router";
 import DataTable from "../../components/DataTable";
+import InboundChainTimeline from "../../components/InboundChainTimeline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
@@ -48,6 +49,15 @@ interface InboundOrder {
   cancelReason: string;
   createTime: string;
   items?: InboundOrderItem[];
+  refExceptionOrderId: number | null;
+  refExceptionOrderNo: string | null;
+  replacementOrders?: {
+    exceptionOrderId: number;
+    exceptionOrderNo: string;
+    replacementInboundOrderId: number;
+    replacementInboundOrderNo: string;
+    handleType: number;
+  }[];
 }
 
 interface Supplier {
@@ -103,6 +113,7 @@ const ORDER_TYPES = [
   { value: 3, label: "调拨入库" },
   { value: 4, label: "赠品入库" },
   { value: 5, label: "其他入库" },
+  { value: 6, label: "补货入库" },
 ];
 
 const STATUS_OPTIONS = [
@@ -167,6 +178,9 @@ export default function InboundList() {
   const [editingOrder, setEditingOrder] = useState<InboundOrder | null>(null);
   const [cancelOrderId, setCancelOrderId] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+
+  // 链路展示
+  const [chainOrderId, setChainOrderId] = useState<number | null>(null);
 
   // 下拉数据
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -538,12 +552,116 @@ export default function InboundList() {
 
   // 表格列定义
   const columns = [
-    { key: "orderNo", title: "入库单号", width: "150px" },
+    {
+      key: "orderNo",
+      title: "入库单号",
+      width: "150px",
+      render: (_: unknown, order: InboundOrder) => (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setChainOrderId(chainOrderId === order.id ? null : order.id)}
+            className="p-0.5 hover:bg-gray-100 rounded"
+          >
+            <ChevronRight
+              size={14}
+              className={`transition-transform ${chainOrderId === order.id ? "rotate-90" : ""}`}
+            />
+          </button>
+          <button
+            onClick={() => navigate(`/inbound/${order.id}`)}
+            className="text-blue-600 hover:underline"
+          >
+            {order.orderNo}
+          </button>
+        </div>
+      ),
+    },
     { key: "orderTypeName", title: "类型", width: "90px" },
-    { key: "poNo", title: "采购单号", width: "130px" },
+    {
+      key: "poNo",
+      title: "采购单号",
+      width: "130px",
+      render: (_: unknown, order: InboundOrder) => {
+        if (order.orderType === 6) {
+          // 补货入库显示采购单号，如果没有则显示异常处理单号
+          if (order.poNo) {
+            return <span className="text-orange-600">{order.poNo}</span>;
+          }
+          if (order.refExceptionOrderNo) {
+            return <span className="text-gray-400">{order.refExceptionOrderNo}</span>;
+          }
+          return "-";
+        }
+        return order.poNo || "-";
+      },
+    },
     { key: "supplierName", title: "供应商", width: "120px" },
-    { key: "deliveryBatchNo", title: "送货批次号", width: "110px" },
+    {
+      key: "deliveryBatchNo",
+      title: "送货批次号",
+      width: "110px",
+      render: (_: unknown, order: InboundOrder) => {
+        if (order.orderType === 6 && order.deliveryBatchNo) {
+          return <span className="text-orange-600">{order.deliveryBatchNo}</span>;
+        }
+        return order.deliveryBatchNo || "-";
+      },
+    },
     { key: "warehouseName", title: "仓库", width: "90px" },
+    {
+      key: "relatedOrders",
+      title: "关联单据",
+      width: "180px",
+      render: (_: unknown, order: InboundOrder) => {
+        const relatedItems: React.ReactNode[] = [];
+
+        // 采购订单
+        if (order.poNo) {
+          relatedItems.push(
+            <span key="po" className="text-xs text-gray-600 block">
+              采购: {order.poNo}
+            </span>
+          );
+        }
+
+        // 补货入库单关联的异常处理单
+        if (order.orderType === 6 && order.refExceptionOrderNo) {
+          relatedItems.push(
+            <button
+              key="ex"
+              onClick={() => navigate(`/exception/${order.refExceptionOrderId}`)}
+              className="text-xs text-orange-600 hover:underline block"
+            >
+              异常: {order.refExceptionOrderNo}
+            </button>
+          );
+        }
+
+        // 该入库单产生的补货入库单（通过异常处理单）
+        if (order.replacementOrders && order.replacementOrders.length > 0) {
+          order.replacementOrders.forEach(rep => {
+            const handleTypeName = { 1: '退货', 2: '换货', 3: '报废', 4: '降价' }[rep.handleType] || '';
+            relatedItems.push(
+              <span key={`rep-${rep.replacementInboundOrderId}`} className="text-xs block">
+                <span className="text-gray-500">{handleTypeName}→</span>
+                <button
+                  onClick={() => navigate(`/inbound/${rep.replacementInboundOrderId}`)}
+                  className="text-green-600 hover:underline ml-1"
+                >
+                  {rep.replacementInboundOrderNo}
+                </button>
+              </span>
+            );
+          });
+        }
+
+        return relatedItems.length > 0 ? (
+          <div className="space-y-0.5">{relatedItems}</div>
+        ) : (
+          "-"
+        );
+      },
+    },
     {
       key: "totalExpectedQty",
       title: "预期数量",
@@ -688,7 +806,26 @@ export default function InboundList() {
             <div className="text-sm text-gray-400 mt-1">点击上方"新建入库单"创建</div>
           </div>
         ) : (
-          <DataTable columns={columns} data={orders} />
+          <div className="space-y-2">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white border rounded-lg">
+                <div className="p-3">
+                  <DataTable columns={columns} data={[order]} />
+                </div>
+                {/* 展开的链路展示 */}
+                {chainOrderId === order.id && (
+                  <div className="border-t bg-gray-50 p-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">单据链路</h4>
+                    <InboundChainTimeline
+                      inboundOrderId={order.id}
+                      onViewInbound={(id) => navigate(`/inbound/${id}`)}
+                      onViewException={(id) => navigate(`/exception/${id}`)}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
 
         {/* 分页 */}

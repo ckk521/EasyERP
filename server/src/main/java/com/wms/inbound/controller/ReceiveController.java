@@ -134,4 +134,17 @@ public class ReceiveController {
         result.put("list", records);
         return Result.success(result);
     }
+
+    /**
+     * 修复入库单状态
+     * 将已全部收货但仍处于"收货中"状态的入库单更新为"验收中"
+     */
+    @PostMapping("/fix-status")
+    @OperationLog(module = "入库管理", action = "FIX", description = "修复入库单状态")
+    public Result<Map<String, Object>> fixOrderStatus() {
+        int fixedCount = receiveService.fixOrderStatus();
+        Map<String, Object> result = new HashMap<>();
+        result.put("fixedCount", fixedCount);
+        return Result.success("修复完成", result);
+    }
 }

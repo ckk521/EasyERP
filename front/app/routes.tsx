@@ -16,7 +16,10 @@ import WaveList from "./pages/outbound/WaveList";
 import InventoryList from "./pages/inventory/InventoryList";
 import InventoryManagement from "./pages/inventory/InventoryManagement";
 import StocktakeList from "./pages/inventory/StocktakeList";
+import StocktakeDetail from "./pages/inventory/StocktakeDetail";
 import TransferList from "./pages/inventory/TransferList";
+import ExceptionList from "./pages/exception/ExceptionList";
+import ExceptionDetail from "./pages/exception/ExceptionDetail";
 import ReportOverview from "./pages/reports/ReportOverview";
 import ReturnList from "./pages/return/ReturnList";
 import UserList from "./pages/system/UserList";
@@ -42,7 +45,7 @@ export const router = createBrowserRouter([
   // Protected routes with Root layout
   {
     path: "/",
-    Component: Root,
+    element: <RequireAuth><Root /></RequireAuth>,
     children: [
       { index: true, Component: Dashboard },
 
@@ -68,7 +71,12 @@ export const router = createBrowserRouter([
       { path: "inventory/list", Component: InventoryManagement },
       { path: "inventory/management", Component: InventoryManagement },
       { path: "inventory/stocktake", Component: StocktakeList },
+      { path: "inventory/stocktake/:id", Component: StocktakeDetail },
       { path: "inventory/transfer", Component: TransferList },
+
+      // 异常管理
+      { path: "exception/list", Component: ExceptionList },
+      { path: "exception/:id", Component: ExceptionDetail },
 
       // 报表分析
       { path: "reports/overview", Component: ReportOverview },

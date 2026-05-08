@@ -1,5 +1,6 @@
 package com.wms.inbound.controller;
 
+import com.wms.inbound.dto.InboundChainDTO;
 import com.wms.inbound.dto.InboundOrderDTO;
 import com.wms.inbound.dto.InboundOrderQueryDTO;
 import com.wms.inbound.service.InboundOrderService;
@@ -106,6 +107,15 @@ public class InboundOrderController {
     }
 
     /**
+     * 获取入库单单据链路（数量流转）
+     */
+    @GetMapping("/{id}/chain")
+    public Result<InboundChainDTO> getInboundChain(@PathVariable Long id) {
+        InboundChainDTO chain = orderService.getInboundChain(id);
+        return Result.success(chain);
+    }
+
+    /**
      * 按送货批次号查询入库单
      */
     @GetMapping("/by-batch")
@@ -116,5 +126,27 @@ public class InboundOrderController {
         queryDTO.setLimit(100);
         Map<String, Object> data = orderService.listOrders(queryDTO);
         return Result.success(data);
+    }
+
+    /**
+     * 更新送货批次号
+     */
+    @PatchMapping("/{id}/delivery-batch")
+    @OperationLog(module = "入库管理", action = "UPDATE", description = "更新送货批次号")
+    public Result<Void> updateDeliveryBatchNo(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String deliveryBatchNo = request.get("deliveryBatchNo");
+        orderService.updateDeliveryBatchNo(id, deliveryBatchNo);
+        return Result.success("送货批次号更新成功", null);
+    }
+
+    /**
+     * 更新采购订单号
+     */
+    @PatchMapping("/{id}/po-no")
+    @OperationLog(module = "入库管理", action = "UPDATE", description = "更新采购订单号")
+    public Result<Void> updatePoNo(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String poNo = request.get("poNo");
+        orderService.updatePoNo(id, poNo);
+        return Result.success("采购订单号更新成功", null);
     }
 }

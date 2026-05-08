@@ -3,6 +3,9 @@ package com.wms.inbound.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.wms.exception.entity.ExceptionOrder;
+import com.wms.exception.repository.ExceptionOrderRepository;
+import com.wms.inbound.dto.InboundChainDTO;
 import com.wms.inbound.dto.InboundOrderDTO;
 import com.wms.inbound.dto.InboundOrderItemDTO;
 import com.wms.inbound.dto.InboundOrderQueryDTO;
@@ -37,6 +40,7 @@ public class InboundOrderService {
     private final ReceiveRecordRepository receiveRecordRepository;
     private final InspectRecordRepository inspectRecordRepository;
     private final PutawayRecordRepository putawayRecordRepository;
+    private final ExceptionOrderRepository exceptionOrderRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -46,7 +50,8 @@ public class InboundOrderService {
         InboundOrder.TYPE_RETURN,
         InboundOrder.TYPE_TRANSFER,
         InboundOrder.TYPE_GIFT,
-        InboundOrder.TYPE_OTHER
+        InboundOrder.TYPE_OTHER,
+        InboundOrder.TYPE_REPLACEMENT
     );
 
     /**
@@ -360,6 +365,34 @@ public class InboundOrderService {
     }
 
     /**
+     * 更新送货批次号
+     */
+    @Transactional
+    public void updateDeliveryBatchNo(Long id, String deliveryBatchNo) {
+        InboundOrder order = orderRepository.selectById(id);
+        if (order == null) {
+            throw new RuntimeException("入库单不存在");
+        }
+        order.setDeliveryBatchNo(deliveryBatchNo);
+        order.setUpdateTime(LocalDateTime.now());
+        orderRepository.updateById(order);
+    }
+
+    /**
+     * 更新采购订单号
+     */
+    @Transactional
+    public void updatePoNo(Long id, String poNo) {
+        InboundOrder order = orderRepository.selectById(id);
+        if (order == null) {
+            throw new RuntimeException("入库单不存在");
+        }
+        order.setPoNo(poNo);
+        order.setUpdateTime(LocalDateTime.now());
+        orderRepository.updateById(order);
+    }
+
+    /**
      * 生成入库单号
      * 格式: IN + 年月日 + 4位序号
      * 示例: IN202604230001
@@ -443,8 +476,33 @@ public class InboundOrderService {
         map.put("totalReturnQty", order.getTotalReturnQty());
         map.put("remark", order.getRemark());
         map.put("cancelReason", order.getCancelReason());
+        map.put("refExceptionOrderId", order.getRefExceptionOrderId());
+        map.put("refExceptionOrderNo", order.getRefExceptionOrderNo());
         map.put("createTime", order.getCreateTime());
         map.put("completeTime", order.getCompleteTime());
+
+        // 查询关联的补货入库单（通过异常处理单）
+        // 查找以该入库单为来源的异常处理单，且已创建补货入库单
+        LambdaQueryWrapper<ExceptionOrder> exWrapper = new LambdaQueryWrapper<>();
+        exWrapper.eq(ExceptionOrder::getInboundOrderId, order.getId())
+                 .isNotNull(ExceptionOrder::getReplacementInboundOrderId);
+        List<ExceptionOrder> exceptionOrders = exceptionOrderRepository.selectList(exWrapper);
+
+        if (!exceptionOrders.isEmpty()) {
+            List<Map<String, Object>> replacementOrders = exceptionOrders.stream()
+                .map(ex -> {
+                    Map<String, Object> repMap = new LinkedHashMap<>();
+                    repMap.put("exceptionOrderId", ex.getId());
+                    repMap.put("exceptionOrderNo", ex.getOrderNo());
+                    repMap.put("replacementInboundOrderId", ex.getReplacementInboundOrderId());
+                    repMap.put("replacementInboundOrderNo", ex.getReplacementInboundOrderNo());
+                    repMap.put("handleType", ex.getHandleType());
+                    return repMap;
+                })
+                .collect(Collectors.toList());
+            map.put("replacementOrders", replacementOrders);
+        }
+
         return map;
     }
 
@@ -496,6 +554,7 @@ public class InboundOrderService {
             case 3: return "调拨入库";
             case 4: return "赠品入库";
             case 5: return "其他入库";
+            case 6: return "补货入库";
             default: return "";
         }
     }
@@ -528,6 +587,173 @@ public class InboundOrderService {
             case 3: return "已上架";
             case 4: return "部分退货";
             case 5: return "全部退货";
+            default: return "";
+        }
+    }
+
+    /**
+     * 获取入库单单据链路（数量流转）
+     */
+    public InboundChainDTO getInboundChain(Long inboundOrderId) {
+        InboundOrder order = orderRepository.selectById(inboundOrderId);
+        if (order == null) {
+            throw new RuntimeException("入库单不存在");
+        }
+
+        InboundChainDTO chain = new InboundChainDTO();
+        chain.setInboundOrderId(order.getId());
+        chain.setInboundOrderNo(order.getOrderNo());
+        chain.setOrderType(order.getOrderType());
+        chain.setOrderTypeName(getOrderTypeName(order.getOrderType()));
+        chain.setPoNo(order.getPoNo());
+        chain.setSupplierName(order.getSupplierName());
+
+        // 设置数量节点
+        InboundChainDTO.QuantityNode quantityNode = new InboundChainDTO.QuantityNode();
+        quantityNode.setExpectedQty(order.getTotalExpectedQty());
+        quantityNode.setReceivedQty(order.getTotalReceivedQty());
+        quantityNode.setQualifiedQty(order.getTotalQualifiedQty());
+        quantityNode.setRejectedQty(order.getTotalRejectedQty());
+        quantityNode.setPutawayQty(order.getTotalPutawayQty());
+        // 计算隔离数量（通过异常处理单）
+        Integer isolatedQty = calculateIsolatedQty(inboundOrderId);
+        quantityNode.setIsolatedQty(isolatedQty);
+        chain.setQuantityNode(quantityNode);
+
+        // 查询关联的异常处理单链路
+        List<InboundChainDTO.ExceptionChainDTO> exceptionChains = buildExceptionChains(inboundOrderId);
+        chain.setExceptionChains(exceptionChains);
+
+        return chain;
+    }
+
+    /**
+     * 计算隔离数量
+     */
+    private Integer calculateIsolatedQty(Long inboundOrderId) {
+        LambdaQueryWrapper<ExceptionOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ExceptionOrder::getInboundOrderId, inboundOrderId)
+               .in(ExceptionOrder::getStatus, 0, 1); // 待处理或处理中
+        List<ExceptionOrder> exceptions = exceptionOrderRepository.selectList(wrapper);
+        return exceptions.stream()
+            .mapToInt(ExceptionOrder::getTotalQty)
+            .sum();
+    }
+
+    /**
+     * 构建异常处理单链路
+     */
+    private List<InboundChainDTO.ExceptionChainDTO> buildExceptionChains(Long inboundOrderId) {
+        LambdaQueryWrapper<ExceptionOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ExceptionOrder::getInboundOrderId, inboundOrderId);
+        List<ExceptionOrder> exceptions = exceptionOrderRepository.selectList(wrapper);
+
+        return exceptions.stream()
+            .map(ex -> {
+                InboundChainDTO.ExceptionChainDTO exChain = new InboundChainDTO.ExceptionChainDTO();
+                exChain.setExceptionOrderId(ex.getId());
+                exChain.setExceptionOrderNo(ex.getOrderNo());
+                exChain.setExceptionType(ex.getExceptionType());
+                exChain.setExceptionTypeName(getExceptionTypeName(ex.getExceptionType()));
+                exChain.setSourceType(ex.getSourceType());
+                exChain.setSourceTypeName(getSourceTypeName(ex.getSourceType()));
+                exChain.setExceptionQty(ex.getTotalQty());
+                exChain.setHandleType(ex.getHandleType());
+                exChain.setHandleTypeName(getHandleTypeName(ex.getHandleType()));
+                exChain.setStatus(ex.getStatus());
+                exChain.setStatusName(getExceptionStatusName(ex.getStatus()));
+
+                // 如果有补货入库单，构建补货信息
+                if (ex.getReplacementInboundOrderId() != null) {
+                    InboundChainDTO.ReplacementInboundDTO replacement = buildReplacementInbound(ex.getReplacementInboundOrderId());
+                    exChain.setReplacementInbound(replacement);
+                }
+
+                return exChain;
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 构建补货入库单信息
+     */
+    private InboundChainDTO.ReplacementInboundDTO buildReplacementInbound(Long replacementInboundOrderId) {
+        InboundOrder replacementOrder = orderRepository.selectById(replacementInboundOrderId);
+        if (replacementOrder == null) return null;
+
+        InboundChainDTO.ReplacementInboundDTO replacement = new InboundChainDTO.ReplacementInboundDTO();
+        replacement.setInboundOrderId(replacementOrder.getId());
+        replacement.setInboundOrderNo(replacementOrder.getOrderNo());
+
+        // 设置数量节点
+        InboundChainDTO.QuantityNode quantityNode = new InboundChainDTO.QuantityNode();
+        quantityNode.setExpectedQty(replacementOrder.getTotalExpectedQty());
+        quantityNode.setReceivedQty(replacementOrder.getTotalReceivedQty());
+        quantityNode.setQualifiedQty(replacementOrder.getTotalQualifiedQty());
+        quantityNode.setRejectedQty(replacementOrder.getTotalRejectedQty());
+        quantityNode.setPutawayQty(replacementOrder.getTotalPutawayQty());
+        Integer isolatedQty = calculateIsolatedQty(replacementInboundOrderId);
+        quantityNode.setIsolatedQty(isolatedQty);
+        replacement.setQuantityNode(quantityNode);
+
+        // 递归构建补货入库单的异常链路
+        List<InboundChainDTO.ExceptionChainDTO> subExceptionChains = buildExceptionChains(replacementInboundOrderId);
+        replacement.setSubExceptionChains(subExceptionChains);
+
+        return replacement;
+    }
+
+    /**
+     * 获取异常类型名称
+     */
+    private String getExceptionTypeName(Integer exceptionType) {
+        if (exceptionType == null) return "";
+        switch (exceptionType) {
+            case 1: return "破损";
+            case 2: return "短缺";
+            case 3: return "质量不合格";
+            case 4: return "错货";
+            case 5: return "其他";
+            default: return "";
+        }
+    }
+
+    /**
+     * 获取来源类型名称
+     */
+    private String getSourceTypeName(Integer sourceType) {
+        if (sourceType == null) return "";
+        switch (sourceType) {
+            case 1: return "收货异常";
+            case 2: return "验收异常";
+            default: return "";
+        }
+    }
+
+    /**
+     * 获取处理方式名称
+     */
+    private String getHandleTypeName(Integer handleType) {
+        if (handleType == null) return "";
+        switch (handleType) {
+            case 1: return "退货";
+            case 2: return "换货";
+            case 3: return "报废";
+            case 4: return "降价销售";
+            default: return "";
+        }
+    }
+
+    /**
+     * 获取异常处理单状态名称
+     */
+    private String getExceptionStatusName(Integer status) {
+        if (status == null) return "";
+        switch (status) {
+            case 0: return "待处理";
+            case 1: return "处理中";
+            case 2: return "已完成";
+            case 3: return "已取消";
             default: return "";
         }
     }

@@ -1,17 +1,20 @@
 package com.wms.inbound.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.wms.exception.dto.ExceptionOrderCreateDTO;
+import com.wms.exception.service.ExceptionService;
 import com.wms.inbound.dto.InspectDTO;
 import com.wms.inbound.entity.InboundOrder;
 import com.wms.inbound.entity.InboundOrderItem;
 import com.wms.inbound.entity.InspectRecord;
-import com.wms.inbound.entity.RejectRecord;
 import com.wms.inbound.repository.InboundOrderItemRepository;
 import com.wms.inbound.repository.InboundOrderRepository;
 import com.wms.inbound.repository.InspectRecordRepository;
 import com.wms.inbound.repository.ReceiveRecordRepository;
-import com.wms.inbound.repository.RejectRecordRepository;
+import com.wms.system.entity.BaseZone;
+import com.wms.system.repository.BaseZoneRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,7 @@ import java.util.Map;
  * - 每次验收插入一条记录到 wms_inspect_record
  * - 入库明细的 qualifiedQty/rejectedQty 通过汇总计算
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InspectService {
@@ -38,7 +42,8 @@ public class InspectService {
     private final InboundOrderItemRepository itemRepository;
     private final InspectRecordRepository inspectRecordRepository;
     private final ReceiveRecordRepository receiveRecordRepository;
-    private final RejectRecordRepository rejectRecordRepository;
+    private final ExceptionService exceptionService;
+    private final BaseZoneRepository zoneRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -124,9 +129,9 @@ public class InspectService {
             itemRepository.updateById(item);
         }
 
-        // 记录不合格品
+        // 验收不合格，创建异常处理单
         if (dto.getRejectedQty() != null && dto.getRejectedQty() > 0) {
-            createRejectRecord(order, item, dto, userId);
+            createExceptionOrderForReject(order, item, dto, userId, username);
         }
 
         // 更新入库单状态和进度
@@ -212,32 +217,103 @@ public class InspectService {
     }
 
     /**
-     * 创建不合格品记录
+     * 创建异常处理单（验收不合格）
+     * 将验收不合格的商品转入异常处理流程
      */
-    private void createRejectRecord(InboundOrder order, InboundOrderItem item,
-                                    InspectDTO dto, Long userId) {
-        RejectRecord record = new RejectRecord();
-        record.setInboundOrderId(order.getId());
-        record.setInboundOrderNo(order.getOrderNo());
-        record.setInboundItemId(item.getId());
-        record.setDeliveryBatchNo(order.getDeliveryBatchNo());
-        record.setProductId(item.getProductId());
-        record.setSkuCode(item.getSkuCode());
-        record.setProductName(item.getProductName());
-        record.setSupplierId(order.getSupplierId());
-        record.setSupplierCode(order.getSupplierCode());
-        record.setSupplierName(order.getSupplierName());
-        record.setRejectQty(dto.getRejectedQty());
-        // 设置不合格类型，默认为"其他"
-        record.setRejectType(dto.getRejectType() != null ? dto.getRejectType() : 6);
-        record.setRejectReason(dto.getRejectReason());
-        record.setRejectImages(dto.getRejectImages());
-        record.setDiscoverStage(RejectRecord.DISCOVER_STAGE_INSPECT);
-        record.setHandleStatus(RejectRecord.HANDLE_STATUS_PENDING);
-        record.setCreateTime(LocalDateTime.now());
-        record.setUpdateTime(LocalDateTime.now());
+    private void createExceptionOrderForReject(InboundOrder order, InboundOrderItem item,
+                                                InspectDTO dto, Long userId, String username) {
+        // 根据不合格类型映射异常类型
+        int exceptionType = mapRejectTypeToExceptionType(dto.getRejectType());
 
-        rejectRecordRepository.insert(record);
+        // 查找隔离库区
+        BaseZone isolationZone = findOrCreateIsolationZone(order.getWarehouseId(), order.getWarehouseCode());
+
+        ExceptionOrderCreateDTO exceptionDTO = new ExceptionOrderCreateDTO();
+        exceptionDTO.setInboundOrderId(order.getId());
+        exceptionDTO.setInboundOrderNo(order.getOrderNo());
+        exceptionDTO.setSupplierId(order.getSupplierId());
+        exceptionDTO.setSupplierCode(order.getSupplierCode());
+        exceptionDTO.setSupplierName(order.getSupplierName());
+        exceptionDTO.setWarehouseId(order.getWarehouseId());
+        exceptionDTO.setWarehouseCode(order.getWarehouseCode());
+        exceptionDTO.setZoneId(isolationZone.getId());
+        exceptionDTO.setZoneCode(isolationZone.getCode());
+        exceptionDTO.setExceptionType(exceptionType);
+        exceptionDTO.setExceptionReason(dto.getRejectReason() != null ? dto.getRejectReason() : "验收不合格");
+        exceptionDTO.setSourceType(2); // 验收异常
+
+        // 创建异常商品明细
+        ExceptionOrderCreateDTO.ExceptionItemDTO itemDTO = new ExceptionOrderCreateDTO.ExceptionItemDTO();
+        itemDTO.setProductId(item.getProductId());
+        itemDTO.setSkuCode(item.getSkuCode());
+        itemDTO.setProductName(item.getProductName());
+        itemDTO.setExceptionQty(dto.getRejectedQty());
+        itemDTO.setExceptionType(exceptionType);
+        itemDTO.setExceptionReason(dto.getRejectReason());
+        itemDTO.setInboundItemId(item.getId());
+        exceptionDTO.setItems(List.of(itemDTO));
+
+        exceptionService.createExceptionOrder(exceptionDTO, userId, username);
+        log.info("验收不合格创建异常处理单: 入库单={}, 商品={}, 不合格数量={}, 原因={}",
+            order.getOrderNo(), item.getSkuCode(), dto.getRejectedQty(), dto.getRejectReason());
+    }
+
+    /**
+     * 将不合格类型映射到异常类型
+     */
+    private int mapRejectTypeToExceptionType(Integer rejectType) {
+        if (rejectType == null) return 5; // 其他
+        switch (rejectType) {
+            case 1: // 包装破损
+            case 2: // 商品损坏
+                return 1; // 破损
+            case 3: // 错货
+                return 4; // 错货
+            case 4: // 规格不符
+                return 4; // 错货
+            case 5: // 效期问题
+                return 3; // 质量不合格
+            case 6: // 其他
+            default:
+                return 5; // 其他
+        }
+    }
+
+    /**
+     * 查找或创建隔离库区
+     */
+    private BaseZone findOrCreateIsolationZone(Long warehouseId, String warehouseCode) {
+        // 查找隔离库区
+        LambdaQueryWrapper<BaseZone> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(BaseZone::getWarehouseId, warehouseId);
+        wrapper.and(w -> w.like(BaseZone::getName, "隔离").or().like(BaseZone::getName, "异常"));
+        List<BaseZone> zones = zoneRepository.selectList(wrapper);
+
+        if (!zones.isEmpty()) {
+            return zones.get(0);
+        }
+
+        // 如果没有隔离库区，使用仓库的第一个库区
+        LambdaQueryWrapper<BaseZone> wrapper2 = new LambdaQueryWrapper<>();
+        wrapper2.eq(BaseZone::getWarehouseId, warehouseId);
+        wrapper2.last("LIMIT 1");
+        BaseZone zone = zoneRepository.selectOne(wrapper2);
+
+        if (zone != null) {
+            return zone;
+        }
+
+        // 如果没有任何库区，创建一个默认的隔离库区
+        BaseZone newZone = new BaseZone();
+        newZone.setWarehouseId(warehouseId);
+        newZone.setWarehouseCode(warehouseCode);
+        newZone.setCode(warehouseCode + "-ISO-01");
+        newZone.setName("隔离库区");
+        newZone.setType(3); // 存储区
+        newZone.setStatus(1);
+        newZone.setCreateTime(LocalDateTime.now());
+        zoneRepository.insert(newZone);
+        return newZone;
     }
 
     /**
