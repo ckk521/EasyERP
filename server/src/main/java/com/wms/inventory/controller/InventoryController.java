@@ -90,4 +90,14 @@ public class InventoryController {
         int fixedCount = inventoryService.fixInventoryBatchNo();
         return Result.success("修复完成，共更新 " + fixedCount + " 条记录", fixedCount);
     }
+
+    /**
+     * 按仓库统计库存数量
+     * 用于盘点单仓库选择时判断哪些仓库有库存
+     */
+    @GetMapping("/summary-by-warehouse")
+    public Result<Map<Long, Integer>> getInventorySummaryByWarehouse() {
+        Map<Long, Integer> summary = inventoryService.getInventorySummaryByWarehouse();
+        return Result.success(summary);
+    }
 }

@@ -47,4 +47,9 @@ public interface InventoryService {
      * 修复库存批次号（从验收记录同步）
      */
     int fixInventoryBatchNo();
+
+    /**
+     * 按仓库统计库存数量
+     */
+    Map<Long, Integer> getInventorySummaryByWarehouse();
 }

@@ -32,8 +32,13 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/api/v1/auth/**").permitAll()
-            .anyRequest().authenticated()
+                // 认证接口
+                .antMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
+                // 基础数据接口（开发阶段）
+                .antMatchers("/api/v1/base/**").permitAll()
+                // 库存管理接口（开发阶段）
+                .antMatchers("/api/v1/inventory/**").permitAll()
+                .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

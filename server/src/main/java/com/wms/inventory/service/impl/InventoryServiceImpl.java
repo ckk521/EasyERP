@@ -14,6 +14,8 @@ import com.wms.system.entity.SysWarehouse;
 import com.wms.system.entity.BaseZone;
 import com.wms.system.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 /**
  * 库存服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
@@ -198,6 +201,21 @@ public class InventoryServiceImpl implements InventoryService {
                 inventory.setExpiryStatus(expiryStatus);
                 inventoryRepository.updateById(inventory);
             }
+        }
+    }
+
+    /**
+     * 每日凌晨1点自动更新效期状态
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @Transactional
+    public void updateExpiryStatusDaily() {
+        log.info("开始执行效期状态定时更新任务");
+        try {
+            updateExpiryStatus();
+            log.info("效期状态定时更新任务执行完成");
+        } catch (Exception e) {
+            log.error("效期状态定时更新任务执行失败: {}", e.getMessage());
         }
     }
 
@@ -444,5 +462,17 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
         return fixedCount;
+    }
+
+    @Override
+    public Map<Long, Integer> getInventorySummaryByWarehouse() {
+        List<Inventory> inventories = inventoryRepository.selectList(null);
+        Map<Long, Integer> summary = new HashMap<>();
+        for (Inventory inv : inventories) {
+            Long warehouseId = inv.getWarehouseId();
+            int qty = inv.getQty() != null ? inv.getQty() : 0;
+            summary.merge(warehouseId, qty, Integer::sum);
+        }
+        return summary;
     }
 }

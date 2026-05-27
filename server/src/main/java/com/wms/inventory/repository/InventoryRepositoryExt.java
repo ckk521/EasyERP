@@ -44,23 +44,29 @@ public interface InventoryRepositoryExt extends BaseMapper<Inventory> {
                                                  @Param("warehouseId") Long warehouseId);
 
     /**
-     * 查询效期预警库存
+     * 查询效期预警库存（warehouseId为null时查询所有仓库）
      */
-    @Select("SELECT i.*, p.name_cn as product_name, p.sku_code, p.barcode " +
+    @Select("<script>" +
+            "SELECT i.*, p.name_cn as product_name, p.sku_code, p.barcode " +
             "FROM wms_inventory i " +
             "LEFT JOIN base_product p ON i.product_id = p.id " +
-            "WHERE i.warehouse_id = #{warehouseId} AND i.expiry_status >= 1 " +
-            "ORDER BY i.expiry_status DESC, i.expiry_date ASC")
+            "WHERE i.expiry_status >= 1 " +
+            "<if test='warehouseId != null'> AND i.warehouse_id = #{warehouseId} </if>" +
+            "ORDER BY i.expiry_status DESC, i.expiry_date ASC" +
+            "</script>")
     List<Inventory> findExpiryWarnings(@Param("warehouseId") Long warehouseId);
 
     /**
-     * 查询指定效期状态的库存
+     * 查询指定效期状态的库存（warehouseId为null时查询所有仓库）
      */
-    @Select("SELECT i.*, p.name_cn as product_name, p.sku_code, p.barcode " +
+    @Select("<script>" +
+            "SELECT i.*, p.name_cn as product_name, p.sku_code, p.barcode " +
             "FROM wms_inventory i " +
             "LEFT JOIN base_product p ON i.product_id = p.id " +
-            "WHERE i.warehouse_id = #{warehouseId} AND i.expiry_status = #{expiryStatus} " +
-            "ORDER BY i.expiry_date ASC")
+            "WHERE i.expiry_status = #{expiryStatus} " +
+            "<if test='warehouseId != null'> AND i.warehouse_id = #{warehouseId} </if>" +
+            "ORDER BY i.expiry_date ASC" +
+            "</script>")
     List<Inventory> findByExpiryStatus(@Param("warehouseId") Long warehouseId,
                                         @Param("expiryStatus") Integer expiryStatus);
 
