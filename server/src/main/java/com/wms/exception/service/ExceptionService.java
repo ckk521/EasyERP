@@ -15,13 +15,18 @@ import com.wms.inbound.entity.Inventory;
 import com.wms.inbound.entity.InventoryTransaction;
 import com.wms.inbound.entity.InboundOrder;
 import com.wms.inbound.entity.InboundOrderItem;
+import com.wms.inbound.entity.ReceiveRecord;
 import com.wms.inbound.repository.InspectRecordRepository;
 import com.wms.inbound.repository.InventoryRepository;
 import com.wms.inbound.repository.InventoryTransactionRepository;
 import com.wms.inbound.repository.InboundOrderRepository;
 import com.wms.inbound.repository.InboundOrderItemRepository;
+import com.wms.inbound.repository.PutawayRecordRepository;
+import com.wms.inbound.repository.ReceiveRecordRepository;
+import com.wms.inbound.service.InboundStatusService;
 import com.wms.system.dto.PageDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -33,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExceptionService {
@@ -44,6 +50,9 @@ public class ExceptionService {
     private final InboundOrderItemRepository inboundOrderItemRepository;
     private final InboundOrderRepository inboundOrderRepository;
     private final InspectRecordRepository inspectRecordRepository;
+    private final ReceiveRecordRepository receiveRecordRepository;
+    private final PutawayRecordRepository putawayRecordRepository;
+    private final InboundStatusService inboundStatusService;
 
     /**
      * 创建异常处理单
@@ -503,47 +512,8 @@ public class ExceptionService {
         itemWrapper.eq(ExceptionItem::getOrderId, orderId);
         List<ExceptionItem> items = itemRepository.selectList(itemWrapper);
 
-        // 根据来源类型区分处理
-        if (order.getSourceType() == ExceptionOrder.SOURCE_RECEIVE) {
-            // 收货异常取消：恢复待收货数量
-            for (ExceptionItem item : items) {
-                if (item.getInboundItemId() != null) {
-                    InboundOrderItem inboundItem = inboundOrderItemRepository.selectById(item.getInboundItemId());
-                    if (inboundItem != null) {
-                        // 恢复待收货数量（减少已收货数量）
-                        Integer currentReceived = inboundItem.getReceivedQty() != null ? inboundItem.getReceivedQty() : 0;
-                        inboundItem.setReceivedQty(Math.max(0, currentReceived - item.getExceptionQty()));
-                        inboundOrderItemRepository.updateById(inboundItem);
-                    }
-                }
-            }
-        } else if (order.getSourceType() == ExceptionOrder.SOURCE_INSPECT) {
-            // 验收异常取消：删除验收记录中的不合格记录，恢复待验收数量
-            for (ExceptionItem item : items) {
-                if (item.getInboundItemId() != null) {
-                    // 查找该入库明细的不合格验收记录
-                    LambdaQueryWrapper<InspectRecord> inspectWrapper = new LambdaQueryWrapper<>();
-                    inspectWrapper.eq(InspectRecord::getInboundItemId, item.getInboundItemId())
-                                  .gt(InspectRecord::getRejectedQty, 0)
-                                  .orderByDesc(InspectRecord::getInspectTime)
-                                  .last("LIMIT 1");
-                    InspectRecord inspectRecord = inspectRecordRepository.selectOne(inspectWrapper);
-
-                    if (inspectRecord != null) {
-                        // 减少不合格数量
-                        int newRejectedQty = inspectRecord.getRejectedQty() - item.getExceptionQty();
-                        if (newRejectedQty <= 0) {
-                            // 如果不合格数量归零，删除该记录
-                            inspectRecordRepository.deleteById(inspectRecord.getId());
-                        } else {
-                            inspectRecord.setRejectedQty(newRejectedQty);
-                            inspectRecord.setInspectQty(inspectRecord.getQualifiedQty() + newRejectedQty);
-                            inspectRecordRepository.updateById(inspectRecord);
-                        }
-                    }
-                }
-            }
-        }
+        // 注意：验收/收货记录的处理在后面统一处理（步骤4.5）
+        // 这里不再单独处理，避免重复且错误的逻辑
 
         // 2. 库存处理：如果已隔离入库，扣减隔离库存
         for (ExceptionItem item : items) {
@@ -608,38 +578,55 @@ public class ExceptionService {
             itemRepository.updateById(item);
         }
 
-        // 5. 更新入库单状态和进度（验收异常取消后需要重新验收）
-        if (order.getSourceType() == ExceptionOrder.SOURCE_INSPECT && order.getInboundOrderId() != null) {
-            InboundOrder inboundOrder = inboundOrderRepository.selectById(order.getInboundOrderId());
-            if (inboundOrder != null) {
-                // 重新计算验收进度
-                LambdaQueryWrapper<InboundOrderItem> itemWrapper2 = new LambdaQueryWrapper<>();
-                itemWrapper2.eq(InboundOrderItem::getOrderId, order.getInboundOrderId());
-                List<InboundOrderItem> inboundItems = inboundOrderItemRepository.selectList(itemWrapper2);
-
-                // 计算总收货数量和已验收数量
-                int totalReceived = inboundItems.stream()
-                    .mapToInt(InboundOrderItem::getReceivedQty)
-                    .sum();
-                int totalInspected = inboundItems.stream()
-                    .mapToInt(item -> {
-                        Integer qualified = item.getQualifiedQty() != null ? item.getQualifiedQty() : 0;
-                        Integer rejected = item.getRejectedQty() != null ? item.getRejectedQty() : 0;
-                        return qualified + rejected;
-                    })
-                    .sum();
-
-                // 更新进度
-                int progressInspect = totalReceived > 0 ? (totalInspected * 100 / totalReceived) : 0;
-                inboundOrder.setProgressInspect(progressInspect);
-
-                // 如果验收进度小于100%，状态回退到验收中
-                if (progressInspect < 100 && inboundOrder.getStatus() == InboundOrder.STATUS_PUTAWAY) {
-                    inboundOrder.setStatus(InboundOrder.STATUS_INSPECTING);
+        // 4.5 处理相关的验收/收货记录
+        // 注意：不能把整条记录标记为已取消，因为验收记录同时包含合格数量和不合格数量
+        // 正确做法：只取消异常相关的数量部分，保留正常数据
+        if (order.getSourceType() == ExceptionOrder.SOURCE_INSPECT) {
+            // 验收异常取消：不合格数量被取消，合格数量保留
+            // 将验收记录的 rejectedQty 设为 0，保留 qualifiedQty
+            for (ExceptionItem exceptionItem : items) {
+                if (exceptionItem.getInboundItemId() != null) {
+                    LambdaQueryWrapper<InspectRecord> inspectWrapper = new LambdaQueryWrapper<>();
+                    inspectWrapper.eq(InspectRecord::getInboundItemId, exceptionItem.getInboundItemId())
+                                   .gt(InspectRecord::getRejectedQty, 0);
+                    List<InspectRecord> records = inspectRecordRepository.selectList(inspectWrapper);
+                    for (InspectRecord record : records) {
+                        // 不标记整条记录为已取消，只清空不合格数量
+                        // 合格数量保留，这样上架数据不受影响
+                        record.setRejectedQty(0);
+                        record.setRemark((record.getRemark() != null ? record.getRemark() : "") + " | 异常取消，不合格数量清零");
+                        inspectRecordRepository.updateById(record);
+                    }
+                    log.info("验收异常取消，清零不合格数量，保留合格数量: 入库明细ID={}", exceptionItem.getInboundItemId());
                 }
-
-                inboundOrderRepository.updateById(inboundOrder);
             }
+        } else if (order.getSourceType() == ExceptionOrder.SOURCE_RECEIVE) {
+            // 收货异常取消：差异数量被取消，正常收货数量保留
+            // 收货记录的 diffQty 表示差异（少货），receiveQty 表示实际收货
+            // 取消异常时，差异数量应该变为0（这部分商品可以重新收货）
+            for (ExceptionItem exceptionItem : items) {
+                if (exceptionItem.getInboundItemId() != null) {
+                    LambdaQueryWrapper<ReceiveRecord> receiveWrapper = new LambdaQueryWrapper<>();
+                    receiveWrapper.eq(ReceiveRecord::getInboundItemId, exceptionItem.getInboundItemId())
+                                   .lt(ReceiveRecord::getDiffQty, 0); // 差异数量小于0表示少货
+                    List<ReceiveRecord> records = receiveRecordRepository.selectList(receiveWrapper);
+                    for (ReceiveRecord record : records) {
+                        // 清零差异数量，保留实际收货数量
+                        record.setDiffQty(0);
+                        record.setDiffReason(null);
+                        record.setRemark((record.getRemark() != null ? record.getRemark() : "") + " | 异常取消，差异数量清零");
+                        receiveRecordRepository.updateById(record);
+                    }
+                    log.info("收货异常取消，清零差异数量，保留收货数量: 入库明细ID={}", exceptionItem.getInboundItemId());
+                }
+            }
+        }
+
+        // 5. 使用统一的状态计算服务更新入库单状态和进度
+        // 这确保了无论当前状态是什么，都会根据实际进度正确计算状态
+        if (order.getInboundOrderId() != null) {
+            log.info("取消异常后重新计算入库单状态: {}", inboundStatusService.getProgressSummary(order.getInboundOrderId()));
+            inboundStatusService.recalculateStatus(order.getInboundOrderId());
         }
 
         return getExceptionOrderById(orderId);

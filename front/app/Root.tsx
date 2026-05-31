@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import {
   LayoutDashboard, Package, Warehouse, Users, FileText,
-  ArrowLeftRight, Settings, TrendingUp, RotateCcw,
+  ArrowLeftRight, Settings, TrendingUp, RotateCcw, AlertTriangle,
   Menu, X, Bell, User, LogOut
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -49,6 +49,13 @@ const menuItems = [
       { title: "库存查询", path: "/inventory/list" },
       { title: "库存盘点", path: "/inventory/stocktake" },
       { title: "库存调拨", path: "/inventory/transfer" },
+    ]
+  },
+  {
+    title: "异常管理",
+    icon: AlertTriangle,
+    children: [
+      { title: "异常处理单", path: "/exception/list" },
     ]
   },
   {

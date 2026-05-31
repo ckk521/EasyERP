@@ -4,6 +4,7 @@ import com.wms.inbound.dto.InboundChainDTO;
 import com.wms.inbound.dto.InboundOrderDTO;
 import com.wms.inbound.dto.InboundOrderQueryDTO;
 import com.wms.inbound.service.InboundOrderService;
+import com.wms.inbound.service.InboundStatusService;
 import com.wms.system.annotation.OperationLog;
 import com.wms.system.common.Result;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class InboundOrderController {
 
     private final InboundOrderService orderService;
+    private final InboundStatusService inboundStatusService;
 
     /**
      * 分页查询入库单列表
@@ -148,5 +150,17 @@ public class InboundOrderController {
         String poNo = request.get("poNo");
         orderService.updatePoNo(id, poNo);
         return Result.success("采购订单号更新成功", null);
+    }
+
+    /**
+     * 重新计算入库单状态
+     * 用于修复历史数据或异常取消后的状态不一致问题
+     */
+    @PostMapping("/{id}/recalculate-status")
+    @OperationLog(module = "入库管理", action = "UPDATE", description = "重新计算入库单状态")
+    public Result<Map<String, Object>> recalculateStatus(@PathVariable Long id) {
+        inboundStatusService.recalculateStatus(id);
+        Map<String, Object> data = orderService.getOrderDetail(id);
+        return Result.success("状态已重新计算", data);
     }
 }

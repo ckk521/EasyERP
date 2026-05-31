@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .antMatchers("/api/v1/base/**").permitAll()
                 // 库存管理接口（开发阶段）
                 .antMatchers("/api/v1/inventory/**").permitAll()
+                // 盘点管理接口（开发阶段）
+                .antMatchers("/api/stocktake/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

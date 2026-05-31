@@ -2,6 +2,7 @@ package com.wms.inbound.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -54,6 +55,15 @@ public class ReceiveRecord {
     /** 异常照片URL(逗号分隔) */
     private String exceptionImages;
 
+    /** 批次号（供应商提供的批次号） */
+    private String batchNo;
+
+    /** 生产日期 */
+    private LocalDate productionDate;
+
+    /** 有效期/过期日期 */
+    private LocalDate expiryDate;
+
     /** 收货时间 */
     private LocalDateTime receiveTime;
 
@@ -62,4 +72,10 @@ public class ReceiveRecord {
 
     /** 收货人姓名 */
     private String receiveUserName;
+
+    /** 状态: 0正常 9已取消 */
+    private Integer status;
+
+    /** 备注 */
+    private String remark;
 }

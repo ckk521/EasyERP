@@ -18,6 +18,8 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+      insert-strategy: not_empty
+      update-strategy: not_empty
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

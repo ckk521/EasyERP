@@ -21,7 +21,7 @@ public class InboundOrder {
     /** 送货批次号 SZ-0421-AM */
     private String deliveryBatchNo;
 
-    /** 入库类型: 1采购 2退货 3调拨 4赠品 5其他 */
+    /** 入库类型: 1采购 2退货 3调拨 4赠品 5其他 6补货 */
     private Integer orderType;
 
     /** 采购订单号(采购入库) */
@@ -81,6 +81,12 @@ public class InboundOrder {
     /** 总退货数量 */
     private Integer totalReturnQty;
 
+    /** 关联的异常处理单ID（补货入库时填写） */
+    private Long refExceptionOrderId;
+
+    /** 关联的异常处理单号 */
+    private String refExceptionOrderNo;
+
     /** 备注 */
     private String remark;
 
@@ -98,7 +104,8 @@ public class InboundOrder {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
-    /** 完成时间 */
+    /** 完成时间 - 使用IGNORED策略确保null值也能更新 */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private LocalDateTime completeTime;
 
     // ========== 状态常量 ==========
@@ -115,4 +122,5 @@ public class InboundOrder {
     public static final int TYPE_TRANSFER = 3;       // 调拨入库
     public static final int TYPE_GIFT = 4;           // 赠品入库
     public static final int TYPE_OTHER = 5;          // 其他入库
+    public static final int TYPE_REPLACEMENT = 6;    // 补货入库
 }

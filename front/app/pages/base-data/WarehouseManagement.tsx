@@ -155,14 +155,47 @@ export default function WarehouseManagement() {
     code: "", name: "", type: 3, tempRequire: 1, defaultShelfType: 1, storageTypes: ""
   });
   const [shelfForm, setShelfForm] = useState({
-    rowNum: 1, shelfType: 1, startLayer: 1, endLayer: 5, columnCount: 10,
-    aisleCount: 1, depthCount: 5,
+    rowNum: 1, shelfType: 1, startLayer: 1, endLayer: 1, columnCount: 1,
+    aisleCount: 1, depthCount: 1,
     storageType: 1, maxLength: "", maxWidth: "", maxHeight: "", maxWeight: ""
   });
 
   // 初始化加载
   useEffect(() => {
     loadWarehouses();
+  }, []);
+
+  // 监听生成库位事件
+  useEffect(() => {
+    const handleGenerateLocations = async (e: CustomEvent<ShelfConfig>) => {
+      const shelf = e.detail;
+      try {
+        const result = await fetchApi<{ generatedCount: number }>(`/api/shelf-config/${shelf.id}/generate-locations`, {
+          method: "POST"
+        });
+        toast.success(`成功生成 ${result.generatedCount} 个库位`);
+        // 重新加载货架配置列表
+        const updatedShelves = await fetchApi<ShelfConfig[]>(`/api/shelf-config/zone/${shelf.zoneId}`);
+        setShelfConfigs(prev => {
+          const others = prev.filter(s => s.zoneId !== shelf.zoneId);
+          return [...others, ...updatedShelves];
+        });
+        // 更新选中的货架状态
+        const updatedShelf = updatedShelves.find(s => s.id === shelf.id);
+        if (updatedShelf) {
+          setSelectedShelf(updatedShelf);
+        }
+        // 重新加载库位列表
+        const locData = await fetchApi<{ list: Location[] }>(
+          `/api/v1/base/locations?zoneId=${shelf.zoneId}&rowNum=${shelf.rowNum}&limit=1000`
+        );
+        setLocations(locData.list || []);
+      } catch (err: unknown) {
+        toast.error((err as Error).message);
+      }
+    };
+    window.addEventListener('generateLocations', handleGenerateLocations as EventListener);
+    return () => window.removeEventListener('generateLocations', handleGenerateLocations as EventListener);
   }, []);
 
   async function loadWarehouses() {
@@ -201,19 +234,6 @@ export default function WarehouseManagement() {
     }
   }
 
-  async function loadLocations(shelfId: number) {
-    try {
-      const shelf = shelfConfigs.find(s => s.id === shelfId);
-      if (!shelf) return;
-      const data = await fetchApi<{ list: Location[] }>(
-        `/api/v1/base/locations?zoneId=${shelf.zoneId}&rowNum=${shelf.rowNum}&limit=1000`
-      );
-      setLocations(data.list || []);
-    } catch {
-      setLocations([]);
-    }
-  }
-
   // 展开/折叠
   function toggleWarehouse(warehouse: Warehouse) {
     const newExpanded = new Set(expandedWarehouses);
@@ -244,7 +264,19 @@ export default function WarehouseManagement() {
 
   function selectShelf(shelf: ShelfConfig) {
     setSelectedShelf(shelf);
-    loadLocations(shelf.id);
+    // 直接使用货架信息加载库位，不依赖 shelfConfigs 状态
+    loadLocationsForShelf(shelf);
+  }
+
+  async function loadLocationsForShelf(shelf: ShelfConfig) {
+    try {
+      const data = await fetchApi<{ list: Location[] }>(
+        `/api/v1/base/locations?zoneId=${shelf.zoneId}&rowNum=${shelf.rowNum}&limit=1000`
+      );
+      setLocations(data.list || []);
+    } catch {
+      setLocations([]);
+    }
   }
 
   // ========== 仓库操作 ==========
@@ -407,8 +439,8 @@ export default function WarehouseManagement() {
       : 0;
     const nextRowNum = maxRowNum + 1;
     setShelfForm({
-      rowNum: nextRowNum, shelfType: inheritedShelfType, startLayer: 1, endLayer: 5, columnCount: 10,
-      aisleCount: 1, depthCount: 5,
+      rowNum: nextRowNum, shelfType: inheritedShelfType, startLayer: 1, endLayer: 1, columnCount: 1,
+      aisleCount: 1, depthCount: 1,
       storageType: parseInt(selectedZone.storageTypes?.split(",")[0] || "1"),
       maxLength: "", maxWidth: "", maxHeight: "", maxWeight: ""
     });
@@ -451,13 +483,30 @@ export default function WarehouseManagement() {
   }
 
   async function generateLocations(shelf: ShelfConfig) {
-    if (!confirm(`确定生成库位？将生成 ${(shelf.endLayer - shelf.startLayer + 1) * shelf.columnCount} 个库位。`)) return;
+    if (!confirm(`确定生成库位？将生成 ${(shelf.endLayer - shelf.startLayer + 1) * (shelf.shelfType === 2 ? (shelf.aisleCount || 1) * (shelf.depthCount || 1) : shelf.columnCount)} 个库位。`)) return;
     try {
       const result = await fetchApi<{ generatedCount: number }>(`/api/shelf-config/${shelf.id}/generate-locations`, {
         method: "POST"
       });
-      toast.success(`成功生成 ${result.isGeneratedCount} 个库位`);
-      loadShelfConfigs(shelf.zoneId);
+      toast.success(`成功生成 ${result.generatedCount} 个库位`);
+      // 重新加载货架配置列表
+      const updatedShelves = await fetchApi<ShelfConfig[]>(`/api/shelf-config/zone/${shelf.zoneId}`);
+      setShelfConfigs(prev => {
+        const others = prev.filter(s => s.zoneId !== shelf.zoneId);
+        return [...others, ...updatedShelves];
+      });
+      // 如果当前选中的是这个货架，更新状态并加载库位
+      if (selectedShelf?.id === shelf.id) {
+        const updatedShelf = updatedShelves.find(s => s.id === shelf.id);
+        if (updatedShelf) {
+          setSelectedShelf(updatedShelf);
+        }
+        // 重新加载库位列表
+        const locData = await fetchApi<{ list: Location[] }>(
+          `/api/v1/base/locations?zoneId=${shelf.zoneId}&rowNum=${shelf.rowNum}&limit=1000`
+        );
+        setLocations(locData.list || []);
+      }
     } catch (err: unknown) {
       toast.error((err as Error).message);
     }
@@ -1072,6 +1121,32 @@ export default function WarehouseManagement() {
 
 // ========== 货架可视化组件 ==========
 function ShelfVisualization({ shelf, locations, viewMode }: { shelf: ShelfConfig; locations: Location[]; viewMode: "tree" | "grid" }) {
+  // 如果货架未生成库位，显示提示信息
+  if (shelf.isGenerated !== 1) {
+    return (
+      <div className="text-center py-16 text-gray-500">
+        <Grid3X3 size={48} className="mx-auto mb-4 text-gray-300" />
+        <div className="text-lg font-medium mb-2">第{shelf.rowNum}排 - {SHELF_TYPES[shelf.shelfType]}</div>
+        <div className="text-sm text-gray-400 mb-4">
+          {shelf.endLayer - shelf.startLayer + 1}层 × {shelf.columnCount}位
+          {shelf.shelfType === 2 && ` (${shelf.aisleCount || 1}通道 × ${shelf.depthCount || 1}深度)`}
+        </div>
+        <div className="text-orange-500 mb-4">此货架尚未生成库位</div>
+        <button
+          onClick={() => {
+            if (confirm(`确定生成库位？将生成 ${(shelf.endLayer - shelf.startLayer + 1) * (shelf.shelfType === 2 ? (shelf.aisleCount || 1) * (shelf.depthCount || 1) : shelf.columnCount)} 个库位。`)) {
+              // 调用生成库位函数（需要从父组件传递）
+              window.dispatchEvent(new CustomEvent('generateLocations', { detail: shelf }));
+            }
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          生成库位
+        </button>
+      </div>
+    );
+  }
+
   const layers = [];
   for (let l = shelf.startLayer; l <= shelf.endLayer; l++) {
     const layerLocations = locations.filter(loc => loc.layerNum === l);

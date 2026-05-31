@@ -25,7 +25,7 @@ public class LocationService {
     private final BaseLocationRepository locationRepository;
     private final BaseZoneRepository zoneRepository;
 
-    public Map<String, Object> listLocations(PageDTO pageDTO, String keyword, Long zoneId, Long warehouseId, Integer type, Integer status) {
+    public Map<String, Object> listLocations(PageDTO pageDTO, String keyword, Long zoneId, Long warehouseId, Integer type, Integer status, Integer rowNum) {
         LambdaQueryWrapper<BaseLocation> wrapper = new LambdaQueryWrapper<>();
 
         if (StringUtils.hasText(keyword)) {
@@ -42,6 +42,9 @@ public class LocationService {
         }
         if (status != null) {
             wrapper.eq(BaseLocation::getStatus, status);
+        }
+        if (rowNum != null) {
+            wrapper.eq(BaseLocation::getRowNum, rowNum);
         }
         wrapper.orderByAsc(BaseLocation::getCode);
 

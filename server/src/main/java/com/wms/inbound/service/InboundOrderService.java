@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wms.exception.entity.ExceptionOrder;
 import com.wms.exception.repository.ExceptionOrderRepository;
+import com.wms.exception.repository.ExceptionItemRepository;
 import com.wms.inbound.dto.InboundChainDTO;
 import com.wms.inbound.dto.InboundOrderDTO;
 import com.wms.inbound.dto.InboundOrderItemDTO;
@@ -41,6 +42,7 @@ public class InboundOrderService {
     private final InspectRecordRepository inspectRecordRepository;
     private final PutawayRecordRepository putawayRecordRepository;
     private final ExceptionOrderRepository exceptionOrderRepository;
+    private final ExceptionItemRepository exceptionItemRepository;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -465,21 +467,54 @@ public class InboundOrderService {
         map.put("actualArrivalDate", order.getActualArrivalDate());
         map.put("status", order.getStatus());
         map.put("statusName", getStatusName(order.getStatus()));
-        map.put("progressReceive", order.getProgressReceive());
-        map.put("progressInspect", order.getProgressInspect());
-        map.put("progressPutaway", order.getProgressPutaway());
-        map.put("totalExpectedQty", order.getTotalExpectedQty());
-        map.put("totalReceivedQty", order.getTotalReceivedQty());
-        map.put("totalQualifiedQty", order.getTotalQualifiedQty());
-        map.put("totalRejectedQty", order.getTotalRejectedQty());
-        map.put("totalPutawayQty", order.getTotalPutawayQty());
-        map.put("totalReturnQty", order.getTotalReturnQty());
         map.put("remark", order.getRemark());
         map.put("cancelReason", order.getCancelReason());
         map.put("refExceptionOrderId", order.getRefExceptionOrderId());
         map.put("refExceptionOrderNo", order.getRefExceptionOrderNo());
         map.put("createTime", order.getCreateTime());
         map.put("completeTime", order.getCompleteTime());
+
+        // 从记录表汇总计算数量，确保数据一致性
+        Long orderId = order.getId();
+
+        // 查询入库明细获取预期数量
+        LambdaQueryWrapper<InboundOrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(InboundOrderItem::getOrderId, orderId);
+        List<InboundOrderItem> items = itemRepository.selectList(itemWrapper);
+        int totalExpectedQty = items.stream().mapToInt(InboundOrderItem::getExpectedQty).sum();
+
+        // 从记录表汇总
+        Integer totalReceivedQty = receiveRecordRepository.sumReceiveQtyByOrderId(orderId);
+        Integer totalQualifiedQty = inspectRecordRepository.sumQualifiedQtyByOrderId(orderId);
+        Integer totalRejectedQty = inspectRecordRepository.sumRejectedQtyByOrderId(orderId);
+        Integer totalPutawayQty = putawayRecordRepository.sumPutawayQtyByOrderId(orderId);
+
+        if (totalReceivedQty == null) totalReceivedQty = 0;
+        if (totalQualifiedQty == null) totalQualifiedQty = 0;
+        if (totalRejectedQty == null) totalRejectedQty = 0;
+        if (totalPutawayQty == null) totalPutawayQty = 0;
+
+        // 计算隔离数量（待处理的异常订单中的商品数量）
+        Integer totalIsolatedQty = exceptionItemRepository.sumIsolatedQtyByOrderId(orderId);
+        if (totalIsolatedQty == null) totalIsolatedQty = 0;
+
+        // 计算进度
+        int progressReceive = totalExpectedQty > 0 ?
+            ((totalReceivedQty + totalIsolatedQty) * 100 / totalExpectedQty) : 0;
+        int progressInspect = totalReceivedQty > 0 ?
+            ((totalQualifiedQty + totalRejectedQty) * 100 / totalReceivedQty) : 0;
+        int progressPutaway = totalQualifiedQty > 0 ?
+            (totalPutawayQty * 100 / totalQualifiedQty) : 0;
+
+        map.put("totalExpectedQty", totalExpectedQty);
+        map.put("totalReceivedQty", totalReceivedQty);
+        map.put("totalQualifiedQty", totalQualifiedQty);
+        map.put("totalRejectedQty", totalRejectedQty);
+        map.put("totalPutawayQty", totalPutawayQty);
+        map.put("totalReturnQty", order.getTotalReturnQty());
+        map.put("progressReceive", progressReceive);
+        map.put("progressInspect", progressInspect);
+        map.put("progressPutaway", progressPutaway);
 
         // 查询关联的补货入库单（通过异常处理单）
         // 查找以该入库单为来源的异常处理单，且已创建补货入库单

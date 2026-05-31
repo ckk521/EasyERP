@@ -151,7 +151,9 @@ export default function PutawayPage() {
     try {
       // 状态 2=验收中, 3=待上架（验收中有合格商品即可开始上架）
       const data = await fetchApi<{ list: InboundOrder[] }>("/api/v1/inbound/orders?status=2,3&limit=50");
-      setOrders(data.list || []);
+      // 过滤出真正有待上架数量的入库单（上架进度 < 100%）
+      const pendingOrders = (data.list || []).filter(order => order.progressPutaway < 100);
+      setOrders(pendingOrders);
     } catch (error) {
       console.error("Failed to load orders:", error);
       setOrders([]);
@@ -164,7 +166,7 @@ export default function PutawayPage() {
   const loadRecentRecords = async () => {
     setLoadingRecords(true);
     try {
-      const data = await fetchApi<{ list: PutawayRecord[] }>("/api/v1/inbound/putaway/records/recent?limit=20");
+      const data = await fetchApi<{ list: PutawayRecord[] }>("/api/v1/inbound/putaway/records/recent?limit=50");
       setRecentRecords(data.list || []);
     } catch (error) {
       console.error("Failed to load records:", error);
@@ -172,6 +174,36 @@ export default function PutawayPage() {
     } finally {
       setLoadingRecords(false);
     }
+  };
+
+  // 按入库单号汇总上架记录
+  const getRecordsSummaryByOrder = () => {
+    const summary = new Map<string, {
+      inboundOrderNo: string;
+      totalPutawayQty: number;
+      recordCount: number;
+      latestTime: string;
+    }>();
+
+    recentRecords.forEach(record => {
+      const existing = summary.get(record.inboundOrderNo);
+      if (existing) {
+        existing.totalPutawayQty += record.putawayQty;
+        existing.recordCount += 1;
+        if (record.putawayTime > existing.latestTime) {
+          existing.latestTime = record.putawayTime;
+        }
+      } else {
+        summary.set(record.inboundOrderNo, {
+          inboundOrderNo: record.inboundOrderNo,
+          totalPutawayQty: record.putawayQty,
+          recordCount: 1,
+          latestTime: record.putawayTime,
+        });
+      }
+    });
+
+    return Array.from(summary.values()).sort((a, b) => b.latestTime.localeCompare(a.latestTime));
   };
 
   // 初始化加载
@@ -334,7 +366,7 @@ export default function PutawayPage() {
         return <span className={pending > 0 ? "text-orange-600 font-medium" : "text-green-600"}>{pending}</span>;
       },
     },
-    { key: "batchNo", title: "批次号", width: "150px", render: (v: string) => v || "-" },
+    { key: "batchNo", title: "批次号", width: "200px", render: (v: string) => v ? <span className="font-mono text-xs">{v}</span> : <span className="text-gray-400">待验收</span> },
     {
       key: "action",
       title: "操作",
@@ -361,7 +393,7 @@ export default function PutawayPage() {
     { key: "skuCode", title: "SKU编码", width: "100px" },
     { key: "productName", title: "商品名称", width: "120px" },
     { key: "locationCode", title: "库位", width: "80px", render: (v: string) => <span className="font-mono">{v}</span> },
-    { key: "putawayQty", title: "上架数量", width: "80px", render: (v: number) => <span className="font-medium">{v}</span> },
+    { key: "putawayQty", title: "上架数量", width: "80px", render: (v: number) => <span className="font-medium text-green-600">{v}</span> },
     { key: "putawayUserName", title: "操作人", width: "80px" },
   ];
 
@@ -373,6 +405,14 @@ export default function PutawayPage() {
     { key: "locationCode", title: "库位", width: "80px", render: (v: string) => <span className="font-mono">{v}</span> },
     { key: "putawayQty", title: "上架数量", width: "80px", render: (v: number) => <span className="font-medium">{v}</span> },
     { key: "putawayUserName", title: "操作人", width: "80px" },
+  ];
+
+  // 按入库单汇总的列定义
+  const summaryColumns = [
+    { key: "inboundOrderNo", title: "入库单号", width: "120px", render: (v: string) => <span className="font-mono font-medium">{v}</span> },
+    { key: "recordCount", title: "上架次数", width: "80px", render: (v: number) => <span className="text-gray-600">{v}次</span> },
+    { key: "totalPutawayQty", title: "上架总数", width: "100px", render: (v: number) => <span className="font-bold text-green-600 text-lg">{v}</span> },
+    { key: "latestTime", title: "最近上架时间", width: "150px", render: (v: string) => v?.replace("T", " ").slice(0, 16) },
   ];
 
   return (
@@ -472,11 +512,34 @@ export default function PutawayPage() {
         </>
       )}
 
-      {/* 最近上架记录 - 放在最下面 */}
+      {/* 按入库单汇总的上架统计 */}
+      <div className="bg-white rounded-lg p-4 border border-gray-200">
+        <h3 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
+          <Layers size={16} />
+          上架汇总（按入库单）
+        </h3>
+        {loadingRecords ? (
+          <div className="text-center py-8 text-gray-400 text-sm">加载中...</div>
+        ) : getRecordsSummaryByOrder().length > 0 ? (
+          <>
+            <DataTable columns={summaryColumns} data={getRecordsSummaryByOrder()} />
+            <div className="mt-3 pt-3 border-t flex justify-between items-center">
+              <span className="text-sm text-gray-500">总计：</span>
+              <span className="font-bold text-green-600 text-xl">
+                {getRecordsSummaryByOrder().reduce((sum, item) => sum + item.totalPutawayQty, 0)} 件
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8 text-gray-400 text-sm">暂无上架记录</div>
+        )}
+      </div>
+
+      {/* 最近上架记录明细 */}
       <div className="bg-white rounded-lg p-4 border border-gray-200">
         <h3 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-2">
           <History size={16} />
-          最近上架记录
+          最近上架记录明细
         </h3>
         {loadingRecords ? (
           <div className="text-center py-8 text-gray-400 text-sm">加载中...</div>

@@ -127,7 +127,9 @@ export default function InspectPage() {
     try {
       // 状态 1=收货中, 2=验收中（收货完成后进入验收）
       const data = await fetchApi<{ list: InboundOrder[] }>("/api/v1/inbound/orders?status=1,2&limit=50");
-      setOrders(data.list || []);
+      // 过滤出真正有待验收数量的入库单（验收进度 < 100%）
+      const pendingOrders = (data.list || []).filter(order => order.progressInspect < 100);
+      setOrders(pendingOrders);
     } catch (error) {
       console.error("Failed to load orders:", error);
       setOrders([]);
@@ -329,10 +331,26 @@ export default function InspectPage() {
       width: "80px",
       render: (_: unknown, item: InboundOrderItem) => {
         const pending = item.receivedQty - (item.qualifiedQty || 0) - (item.rejectedQty || 0);
-        const isComplete = pending <= 0;
+        // 如果没有收货，显示"待收货"
+        if (item.receivedQty === 0) {
+          return (
+            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">
+              待收货
+            </span>
+          );
+        }
+        // 如果有待验收数量，显示"待验收"
+        if (pending > 0) {
+          return (
+            <span className="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-700">
+              待验收
+            </span>
+          );
+        }
+        // 验收完成
         return (
-          <span className={`px-2 py-0.5 rounded text-xs ${isComplete ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-            {isComplete ? "已验收" : "待验收"}
+          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+            已验收
           </span>
         );
       },

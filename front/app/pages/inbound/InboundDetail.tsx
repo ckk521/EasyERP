@@ -141,7 +141,7 @@ export default function InboundDetail() {
     { key: "qualifiedQty", title: "合格数量", width: "80px", render: (v: number) => v?.toLocaleString() || 0 },
     { key: "rejectedQty", title: "不合格", width: "80px", render: (v: number) => v?.toLocaleString() || 0 },
     { key: "putawayQty", title: "已上架", width: "80px", render: (v: number) => v?.toLocaleString() || 0 },
-    { key: "batchNo", title: "批次号", width: "150px" },
+    { key: "batchNo", title: "批次号", width: "200px", render: (v: string) => v ? <span className="font-mono text-xs">{v}</span> : <span className="text-gray-400">-</span> },
     {
       key: "status",
       title: "状态",

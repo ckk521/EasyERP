@@ -60,4 +60,10 @@ public class InspectRecord {
 
     /** 验收人姓名 */
     private String inspectUserName;
+
+    /** 状态: 0正常 9已取消 */
+    private Integer status;
+
+    /** 备注 */
+    private String remark;
 }

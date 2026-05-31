@@ -125,6 +125,8 @@ export default function ReceivePage() {
   const [currentItem, setCurrentItem] = useState<InboundOrderItem | null>(null);
   const [receiveQty, setReceiveQty] = useState(0);
   const [diffReason, setDiffReason] = useState("");
+  const [productionDate, setProductionDate] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
 
   // 差异确认弹窗
   const [diffModalOpen, setDiffModalOpen] = useState(false);
@@ -211,6 +213,8 @@ export default function ReceivePage() {
     const pendingQty = item.expectedQty - (item.receivedQty || 0);
     setReceiveQty(pendingQty);
     setDiffReason("");
+    setProductionDate("");
+    setExpiryDate("");
     setReceiveModalOpen(true);
   };
 
@@ -336,6 +340,8 @@ export default function ReceivePage() {
           itemId: currentItem.id,
           receivedQty: receiveQty,
           diffReason: diffReason,
+          productionDate: productionDate || null,
+          expiryDate: expiryDate || null,
         }),
       });
       toast.success("收货成功");
@@ -690,6 +696,26 @@ export default function ReceivePage() {
                     </p>
                   )}
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>生产日期</Label>
+                    <Input
+                      type="date"
+                      value={productionDate}
+                      onChange={(e) => setProductionDate(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>有效期</Label>
+                    <Input
+                      type="date"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
                 {shortageQty > 0 && (
                   <div className="bg-orange-50 rounded p-3 text-sm border border-orange-200">
                     <div className="flex items-center gap-2 text-orange-700 font-medium mb-1">
@@ -710,12 +736,17 @@ export default function ReceivePage() {
                     disabled={!hasDiff}
                   >
                     <option value="">{hasDiff ? "选择差异原因" : "数量一致，无需填写"}</option>
-                    <option value="供应商少发货">供应商少发货</option>
-                    <option value="运输损耗">运输损耗</option>
-                    <option value="包装破损">包装破损</option>
-                    <option value="质量不合格">质量不合格</option>
+                    <option value="供应商少货">供应商少货 ⚠️ 异常</option>
+                    <option value="运输损耗">运输损耗 ⚠️ 异常</option>
+                    <option value="包装破损">包装破损 ⚠️ 异常</option>
+                    <option value="质量不合格">质量不合格 ⚠️ 异常</option>
                     <option value="其他">其他</option>
                   </select>
+                  {hasDiff && shortageQty > 0 && (
+                    <p className="text-xs text-orange-600 mt-1">
+                      选择带 ⚠️ 标记的原因将自动创建异常处理单
+                    </p>
+                  )}
                 </div>
               </div>
             );

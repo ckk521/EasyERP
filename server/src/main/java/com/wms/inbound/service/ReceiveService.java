@@ -2,7 +2,10 @@ package com.wms.inbound.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wms.exception.dto.ExceptionOrderCreateDTO;
+import com.wms.exception.entity.ExceptionItem;
+import com.wms.exception.entity.ExceptionOrder;
 import com.wms.exception.repository.ExceptionItemRepository;
+import com.wms.exception.repository.ExceptionOrderRepository;
 import com.wms.exception.service.ExceptionService;
 import com.wms.inbound.dto.ReceiveDTO;
 import com.wms.inbound.entity.InboundOrder;
@@ -11,6 +14,7 @@ import com.wms.inbound.entity.ReceiveRecord;
 import com.wms.inbound.repository.InboundOrderItemRepository;
 import com.wms.inbound.repository.InboundOrderRepository;
 import com.wms.inbound.repository.ReceiveRecordRepository;
+import com.wms.inbound.service.InboundStatusService;
 import com.wms.system.entity.BaseZone;
 import com.wms.system.repository.BaseZoneRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +25,11 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +50,9 @@ public class ReceiveService {
     private final ReceiveRecordRepository receiveRecordRepository;
     private final ExceptionService exceptionService;
     private final ExceptionItemRepository exceptionItemRepository;
+    private final ExceptionOrderRepository exceptionOrderRepository;
     private final BaseZoneRepository zoneRepository;
+    private final InboundStatusService inboundStatusService;
 
     /** 差异阈值百分比(10%) */
     private static final double DIFF_THRESHOLD = 0.10;
@@ -159,6 +167,12 @@ public class ReceiveService {
         // 差异校验（基于待收货数量）
         validateDifference(pendingQty, dto.getReceivedQty(), dto.getDiffReason());
 
+        // 收货数量大于0时，自动生成批次号
+        String batchNo = null;
+        if (dto.getReceivedQty() > 0) {
+            batchNo = generateBatchNo(order.getOrderNo(), item.getSkuCode());
+        }
+
         // 创建收货记录
         ReceiveRecord record = new ReceiveRecord();
         record.setInboundOrderId(dto.getOrderId());
@@ -171,10 +185,34 @@ public class ReceiveService {
         record.setDiffQty(diff);
         record.setDiffReason(dto.getDiffReason());
         record.setHasException(shortageQty > 0 && StringUtils.hasText(dto.getDiffReason()) ? 1 : 0);
+        record.setBatchNo(batchNo);
+        record.setProductionDate(dto.getProductionDate());
+        record.setExpiryDate(dto.getExpiryDate());
         record.setReceiveTime(LocalDateTime.now());
         record.setReceiveUser(userId);
         record.setReceiveUserName(username != null ? username : "操作员");
         receiveRecordRepository.insert(record);
+
+        // 更新入库明细的收货数量和批次号
+        if (dto.getReceivedQty() > 0) {
+            // 累加收货数量
+            Integer currentReceived = item.getReceivedQty() != null ? item.getReceivedQty() : 0;
+            item.setReceivedQty(currentReceived + dto.getReceivedQty());
+            if (batchNo != null) {
+                item.setBatchNo(batchNo);
+            }
+            if (dto.getProductionDate() != null) {
+                item.setProductionDate(dto.getProductionDate());
+            }
+            if (dto.getExpiryDate() != null) {
+                item.setExpiryDate(dto.getExpiryDate());
+            }
+            // 更新状态为已收货
+            if (item.getStatus() == InboundOrderItem.STATUS_PENDING) {
+                item.setStatus(InboundOrderItem.STATUS_RECEIVED);
+            }
+            itemRepository.updateById(item);
+        }
 
         // 如果有短缺差异且原因属于异常类型，自动创建异常处理单
         if (shortageQty > 0 && StringUtils.hasText(dto.getDiffReason()) &&
@@ -298,8 +336,12 @@ public class ReceiveService {
         if (dto.getItemId() == null) {
             throw new IllegalArgumentException("入库明细ID不能为空");
         }
-        if (dto.getReceivedQty() == null || dto.getReceivedQty() <= 0) {
-            throw new IllegalArgumentException("收货数量必须大于0");
+        // 收货数量可以为0（表示全部拒收），但必须填写差异原因
+        if (dto.getReceivedQty() == null || dto.getReceivedQty() < 0) {
+            throw new IllegalArgumentException("收货数量不能为负数");
+        }
+        if (dto.getReceivedQty() == 0 && !StringUtils.hasText(dto.getDiffReason())) {
+            throw new IllegalArgumentException("收货数量为0时必须填写差异原因");
         }
     }
 
@@ -336,54 +378,40 @@ public class ReceiveService {
     }
 
     /**
+     * 生成批次号
+     * 格式：入库单号-SKU后3位-序号
+     * 例如：IN202605100001-009-01
+     */
+    private String generateBatchNo(String orderNo, String skuCode) {
+        String skuSuffix = skuCode.length() >= 3 ?
+            skuCode.substring(skuCode.length() - 3) : skuCode;
+        // 获取当天该SKU的序号（简化处理，实际可查询已有批次号）
+        int seq = 1;
+        return orderNo + "-" + skuSuffix + "-" + String.format("%02d", seq);
+    }
+
+    /**
      * 收货后更新入库单状态和进度
      */
     private void updateOrderAfterReceive(Long orderId, InboundOrder order) {
-        // 更新入库单状态为收货中
-        if (order.getStatus() == InboundOrder.STATUS_PENDING) {
-            order.setStatus(InboundOrder.STATUS_RECEIVING);
-        }
-
-        // 更新进度
-        updateOrderProgressInternal(orderId, order);
-
-        // 检查是否全部收货完成，如果是则转为验收中
-        checkAndUpdateOrderStatusInternal(orderId, order);
-
-        orderRepository.updateById(order);
+        // 使用统一的状态计算服务更新入库单状态和进度
+        inboundStatusService.recalculateStatus(orderId);
     }
 
     /**
      * 内部方法：检查并更新入库单状态
-     * 全部商品收货完成后状态变为验收中
+     * 已废弃，使用 InboundStatusService.recalculateStatus 替代
+     * @deprecated 使用 {@link InboundStatusService#recalculateStatus(Long)} 替代
      */
+    @Deprecated
     private void checkAndUpdateOrderStatusInternal(Long orderId, InboundOrder order) {
-        // 只有收货中状态才检查
-        if (order.getStatus() != InboundOrder.STATUS_RECEIVING) {
-            return;
-        }
-
-        // 查询所有明细
-        LambdaQueryWrapper<InboundOrderItem> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(InboundOrderItem::getOrderId, orderId);
-        List<InboundOrderItem> items = itemRepository.selectList(wrapper);
-
-        // 检查是否全部已收货（通过记录表汇总）
-        boolean allReceived = items.stream()
-            .allMatch(item -> {
-                Integer received = receiveRecordRepository.sumReceiveQtyByItemId(item.getId());
-                return received != null && received >= item.getExpectedQty();
-            });
-
-        if (allReceived) {
-            order.setStatus(InboundOrder.STATUS_INSPECTING);
-            log.info("入库单 {} 全部收货完成，状态变更为验收中", order.getOrderNo());
-        }
+        // 委托给统一的状态计算服务
+        inboundStatusService.recalculateStatus(orderId);
     }
 
     /**
      * 检查并更新入库单状态
-     * TC-2.5.5 全部商品收货完成后状态变为验收中
+     * TC-2.5.5 全部商品收货或隔离完成后状态变为验收中
      */
     @Transactional
     public void checkAndUpdateOrderStatus(Long orderId) {
@@ -397,14 +425,17 @@ public class ReceiveService {
         wrapper.eq(InboundOrderItem::getOrderId, orderId);
         List<InboundOrderItem> items = itemRepository.selectList(wrapper);
 
-        // 检查是否全部已收货（通过记录表汇总）
-        boolean allReceived = items.stream()
+        // 检查是否全部已收货或隔离
+        boolean allProcessed = items.stream()
             .allMatch(item -> {
                 Integer received = receiveRecordRepository.sumReceiveQtyByItemId(item.getId());
-                return received != null && received >= item.getExpectedQty();
+                if (received == null) received = 0;
+                Integer isolated = exceptionItemRepository.sumIsolatedQtyByInboundItemId(item.getId());
+                if (isolated == null) isolated = 0;
+                return received + isolated >= item.getExpectedQty();
             });
 
-        if (allReceived) {
+        if (allProcessed) {
             order.setStatus(InboundOrder.STATUS_INSPECTING);
             orderRepository.updateById(order);
         }
@@ -425,6 +456,7 @@ public class ReceiveService {
 
     /**
      * 内部方法：更新入库单进度
+     * 进度计算包含隔离数量：(已收货 + 已隔离) / 预期数量
      */
     private void updateOrderProgressInternal(Long orderId, InboundOrder order) {
         LambdaQueryWrapper<InboundOrderItem> wrapper = new LambdaQueryWrapper<>();
@@ -440,8 +472,13 @@ public class ReceiveService {
         Integer totalReceived = receiveRecordRepository.sumReceiveQtyByOrderId(orderId);
         if (totalReceived == null) totalReceived = 0;
 
-        // 计算进度百分比
-        int progress = totalExpected > 0 ? (totalReceived * 100 / totalExpected) : 0;
+        // 计算总隔离数量（从异常商品表汇总）
+        Integer totalIsolated = exceptionItemRepository.sumIsolatedQtyByOrderId(orderId);
+        if (totalIsolated == null) totalIsolated = 0;
+
+        // 计算进度百分比：(已收货 + 已隔离) / 预期数量
+        int totalProcessed = totalReceived + totalIsolated;
+        int progress = totalExpected > 0 ? (totalProcessed * 100 / totalExpected) : 0;
 
         order.setTotalExpectedQty(totalExpected);
         order.setTotalReceivedQty(totalReceived);
@@ -583,5 +620,121 @@ public class ReceiveService {
             }
         }
         return fixedCount;
+    }
+
+    /**
+     * 清零已取消异常的差异数量
+     * 用于修复历史数据：当收货异常被取消后，收货记录中的差异数量应该清零
+     */
+    @Transactional
+    public int clearCancelledExceptionDiff(Long orderId) {
+        // 查询该入库单的所有已取消异常订单（sourceType=1 表示收货异常）
+        LambdaQueryWrapper<ExceptionOrder> exWrapper = new LambdaQueryWrapper<>();
+        exWrapper.eq(ExceptionOrder::getInboundOrderId, orderId)
+                 .eq(ExceptionOrder::getSourceType, ExceptionOrder.SOURCE_RECEIVE)
+                 .eq(ExceptionOrder::getStatus, ExceptionOrder.STATUS_CANCELLED);
+        List<ExceptionOrder> cancelledExceptions = exceptionOrderRepository.selectList(exWrapper);
+
+        if (cancelledExceptions.isEmpty()) {
+            log.info("入库单 {} 没有已取消的收货异常", orderId);
+            return 0;
+        }
+
+        // 收集所有异常明细的入库明细ID
+        Set<Long> inboundItemIds = new HashSet<>();
+        for (ExceptionOrder exOrder : cancelledExceptions) {
+            LambdaQueryWrapper<ExceptionItem> itemWrapper = new LambdaQueryWrapper<>();
+            itemWrapper.eq(ExceptionItem::getOrderId, exOrder.getId());
+            List<ExceptionItem> items = exceptionItemRepository.selectList(itemWrapper);
+            for (ExceptionItem item : items) {
+                if (item.getInboundItemId() != null) {
+                    inboundItemIds.add(item.getInboundItemId());
+                }
+            }
+        }
+
+        // 清零这些入库明细的差异数量
+        int clearedCount = 0;
+        for (Long inboundItemId : inboundItemIds) {
+            LambdaQueryWrapper<ReceiveRecord> recordWrapper = new LambdaQueryWrapper<>();
+            recordWrapper.eq(ReceiveRecord::getInboundItemId, inboundItemId)
+                         .lt(ReceiveRecord::getDiffQty, 0);
+            List<ReceiveRecord> records = receiveRecordRepository.selectList(recordWrapper);
+            for (ReceiveRecord record : records) {
+                record.setDiffQty(0);
+                record.setDiffReason(null);
+                record.setRemark((record.getRemark() != null ? record.getRemark() : "") + " | 异常取消，差异数量清零(修复)");
+                receiveRecordRepository.updateById(record);
+                clearedCount++;
+                log.info("清零收货记录差异: 记录ID={}, 入库明细ID={}", record.getId(), inboundItemId);
+            }
+        }
+
+        // 更新入库单进度和状态
+        if (clearedCount > 0) {
+            InboundOrder order = orderRepository.selectById(orderId);
+            if (order != null) {
+                // 重新计算收货进度
+                updateOrderProgressInternal(orderId, order);
+
+                // 检查是否有待收货数量
+                LambdaQueryWrapper<InboundOrderItem> itemWrapper = new LambdaQueryWrapper<>();
+                itemWrapper.eq(InboundOrderItem::getOrderId, orderId);
+                List<InboundOrderItem> items = itemRepository.selectList(itemWrapper);
+
+                boolean hasPending = items.stream().anyMatch(item -> {
+                    Integer received = receiveRecordRepository.sumReceiveQtyByItemId(item.getId());
+                    if (received == null) received = 0;
+                    Integer isolated = exceptionItemRepository.sumIsolatedQtyByInboundItemId(item.getId());
+                    if (isolated == null) isolated = 0;
+                    return received + isolated < item.getExpectedQty();
+                });
+
+                // 如果有待收货数量，将状态改回"收货中"
+                if (hasPending && order.getStatus() != InboundOrder.STATUS_PENDING && order.getStatus() != InboundOrder.STATUS_RECEIVING) {
+                    order.setStatus(InboundOrder.STATUS_RECEIVING);
+                    log.info("入库单 {} 有待收货数量，状态改回收货中", order.getOrderNo());
+                }
+
+                orderRepository.updateById(order);
+            }
+        }
+
+        return clearedCount;
+    }
+
+    /**
+     * 重置入库单状态为收货中
+     * 用于修复历史数据：当入库单已完成但有未收货数量时，将状态改回收货中
+     */
+    @Transactional
+    public void resetOrderToReceiving(Long orderId) {
+        InboundOrder order = orderRepository.selectById(orderId);
+        if (order == null) {
+            throw new RuntimeException("入库单不存在");
+        }
+
+        // 检查是否有待收货数量
+        LambdaQueryWrapper<InboundOrderItem> itemWrapper = new LambdaQueryWrapper<>();
+        itemWrapper.eq(InboundOrderItem::getOrderId, orderId);
+        List<InboundOrderItem> items = itemRepository.selectList(itemWrapper);
+
+        boolean hasPending = items.stream().anyMatch(item -> {
+            Integer received = receiveRecordRepository.sumReceiveQtyByItemId(item.getId());
+            if (received == null) received = 0;
+            Integer isolated = exceptionItemRepository.sumIsolatedQtyByInboundItemId(item.getId());
+            if (isolated == null) isolated = 0;
+            return received + isolated < item.getExpectedQty();
+        });
+
+        if (!hasPending) {
+            throw new RuntimeException("入库单没有待收货数量，无法重置");
+        }
+
+        // 将状态改回"收货中"
+        order.setStatus(InboundOrder.STATUS_RECEIVING);
+        order.setCompleteTime(null);
+        orderRepository.updateById(order);
+        log.info("入库单 {} 状态已重置为收货中", order.getOrderNo());
     }
 }

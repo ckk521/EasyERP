@@ -25,13 +25,14 @@ public class LocationController {
             @RequestParam(required = false) Long zoneId,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) Integer type,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer rowNum) {
 
         PageDTO pageDTO = new PageDTO();
         pageDTO.setPage(page);
         pageDTO.setLimit(limit);
 
-        Map<String, Object> data = locationService.listLocations(pageDTO, keyword, zoneId, warehouseId, type, status);
+        Map<String, Object> data = locationService.listLocations(pageDTO, keyword, zoneId, warehouseId, type, status, rowNum);
         return Result.success(data);
     }
 

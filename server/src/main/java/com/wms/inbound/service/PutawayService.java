@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wms.inbound.dto.PutawayDTO;
 import com.wms.inbound.entity.*;
 import com.wms.inbound.repository.*;
+import com.wms.inbound.service.InboundStatusService;
 import com.wms.system.entity.BaseLocation;
 import com.wms.system.entity.BaseShelfConfig;
 import com.wms.system.repository.BaseLocationRepository;
@@ -42,6 +43,7 @@ public class PutawayService {
     private final InventoryTransactionRepository transactionRepository;
     private final BaseLocationRepository locationRepository;
     private final BaseShelfConfigRepository shelfConfigRepository;
+    private final InboundStatusService inboundStatusService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -476,43 +478,10 @@ public class PutawayService {
 
     /**
      * 上架后更新入库单状态和进度
-     * 改为从记录表汇总计算
      */
     private void updateOrderAfterPutaway(Long orderId, InboundOrder order) {
-        // 从记录表汇总计算总上架数量
-        Integer totalPutaway = putawayRecordRepository.sumPutawayQtyByOrderId(orderId);
-        if (totalPutaway == null) totalPutaway = 0;
-
-        // 从验收记录表汇总计算总合格数量
-        Integer totalQualified = inspectRecordRepository.sumQualifiedQtyByOrderId(orderId);
-        if (totalQualified == null) totalQualified = 0;
-
-        // 计算进度
-        int progress = totalQualified > 0 ? (totalPutaway * 100 / totalQualified) : 0;
-
-        order.setTotalPutawayQty(totalPutaway);
-        order.setProgressPutaway(progress);
-
-        // 检查是否全部上架完成（通过记录表判断）
-        LambdaQueryWrapper<InboundOrderItem> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(InboundOrderItem::getOrderId, orderId);
-        List<InboundOrderItem> items = itemRepository.selectList(wrapper);
-
-        boolean allPutaway = items.stream()
-            .allMatch(item -> {
-                Integer putaway = putawayRecordRepository.sumPutawayQtyByItemId(item.getId());
-                Integer qualified = inspectRecordRepository.sumQualifiedQtyByItemId(item.getId());
-                if (putaway == null) putaway = 0;
-                if (qualified == null) qualified = 0;
-                return putaway >= qualified;
-            });
-
-        if (allPutaway) {
-            order.setStatus(InboundOrder.STATUS_COMPLETED);
-            order.setCompleteTime(LocalDateTime.now());
-        }
-
-        orderRepository.updateById(order);
+        // 使用统一的状态计算服务更新入库单状态和进度
+        inboundStatusService.recalculateStatus(orderId);
     }
 
     /**

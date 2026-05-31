@@ -1,0 +1,6 @@
+2026-05-10 20:16:48.391 [http-nio-8081-exec-9] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 该商品已全部收货或已隔离，不能再收货。已收货: 200，已隔离: 100
+2026-05-10 20:17:05.531 [http-nio-8081-exec-1] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 该商品已全部收货或已隔离，不能再收货。已收货: 200，已隔离: 100
+2026-05-10 20:30:17.761 [http-nio-8081-exec-5] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 入库单不存在: 1
+2026-05-10 20:45:32.899 [http-nio-8081-exec-2] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 该商品已全部收货或已隔离，不能再收货。已收货: 200，已隔离: 100
+2026-05-10 20:46:09.836 [http-nio-8081-exec-1] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 该商品已全部收货或已隔离，不能再收货。已收货: 200，已隔离: 100
+2026-05-10 20:51:43.307 [http-nio-8081-exec-2] ERROR com.wms.system.aspect.OperationLogAspect - 操作失败: 入库管理 - 该商品已全部收货或已隔离，不能再收货。已收货: 200，已隔离: 100

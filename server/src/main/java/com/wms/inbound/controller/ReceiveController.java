@@ -147,4 +147,30 @@ public class ReceiveController {
         result.put("fixedCount", fixedCount);
         return Result.success("修复完成", result);
     }
+
+    /**
+     * 清零已取消异常的差异数量
+     * 用于修复历史数据：当收货异常被取消后，收货记录中的差异数量应该清零
+     */
+    @PostMapping("/clear-cancelled-diff")
+    @OperationLog(module = "入库管理", action = "FIX", description = "清零已取消异常的差异数量")
+    public Result<Map<String, Object>> clearCancelledDiff(@RequestParam Long orderId) {
+        int clearedCount = receiveService.clearCancelledExceptionDiff(orderId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("clearedCount", clearedCount);
+        return Result.success("修复完成", result);
+    }
+
+    /**
+     * 重置入库单状态为收货中
+     * 用于修复历史数据：当入库单已完成但有未收货数量时，将状态改回收货中
+     */
+    @PostMapping("/reset-to-receiving")
+    @OperationLog(module = "入库管理", action = "FIX", description = "重置入库单状态为收货中")
+    public Result<Map<String, Object>> resetToReceiving(@RequestParam Long orderId) {
+        receiveService.resetOrderToReceiving(orderId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderId", orderId);
+        return Result.success("状态已重置", result);
+    }
 }

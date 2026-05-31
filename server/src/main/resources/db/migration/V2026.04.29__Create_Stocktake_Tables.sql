@@ -1,0 +1,68 @@
+-- 盘点模块数据库表
+-- Story 4.4-4.7 盘点管理
+
+-- 盘点单主表
+CREATE TABLE IF NOT EXISTS `wms_stocktake_order` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `order_no` VARCHAR(32) NOT NULL COMMENT '盘点单号',
+    `warehouse_id` BIGINT NOT NULL COMMENT '仓库ID',
+    `warehouse_code` VARCHAR(32) COMMENT '仓库编码',
+    `warehouse_name` VARCHAR(100) COMMENT '仓库名称',
+    `stocktake_type` TINYINT NOT NULL DEFAULT 1 COMMENT '盘点类型：1-全盘 2-抽盘 3-循环盘',
+    `blind_mode` TINYINT NOT NULL DEFAULT 0 COMMENT '盲盘模式：0-明盘 1-盲盘',
+    `scope_type` VARCHAR(32) COMMENT '筛选方式：all-全部 zone-库区 category-分类 abc-ABC分类 sku-SKU random-随机',
+    `scope_config` TEXT COMMENT '筛选条件JSON',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-待盘点 1-盘点中 2-待审核 3-已完成 4-已取消',
+    `total_items` INT NOT NULL DEFAULT 0 COMMENT '总商品数',
+    `counted_items` INT NOT NULL DEFAULT 0 COMMENT '已盘点数',
+    `diff_items` INT NOT NULL DEFAULT 0 COMMENT '差异数',
+    `accuracy_rate` DECIMAL(5,2) COMMENT '准确率(%)',
+    `plan_date` DATE COMMENT '计划日期',
+    `start_time` DATETIME COMMENT '开始时间',
+    `finish_time` DATETIME COMMENT '完成时间',
+    `approve_user_id` BIGINT COMMENT '审核人ID',
+    `approve_user_name` VARCHAR(50) COMMENT '审核人姓名',
+    `approve_time` DATETIME COMMENT '审核时间',
+    `remark` VARCHAR(500) COMMENT '备注',
+    `create_user_id` BIGINT COMMENT '创建人ID',
+    `create_user_name` VARCHAR(50) COMMENT '创建人姓名',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_order_no` (`order_no`),
+    KEY `idx_warehouse_id` (`warehouse_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_plan_date` (`plan_date`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='盘点单主表';
+
+-- 盘点明细表
+CREATE TABLE IF NOT EXISTS `wms_stocktake_item` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `order_id` BIGINT NOT NULL COMMENT '盘点单ID',
+    `order_no` VARCHAR(32) NOT NULL COMMENT '盘点单号',
+    `product_id` BIGINT COMMENT '商品ID',
+    `sku_code` VARCHAR(64) COMMENT 'SKU编码',
+    `product_name` VARCHAR(200) COMMENT '商品名称',
+    `barcode` VARCHAR(64) COMMENT '条码',
+    `location_id` BIGINT COMMENT '库位ID',
+    `location_code` VARCHAR(32) COMMENT '库位编码',
+    `batch_no` VARCHAR(64) COMMENT '批次号',
+    `system_qty` INT NOT NULL DEFAULT 0 COMMENT '系统数量',
+    `counted_qty` INT COMMENT '盘点数量',
+    `diff_qty` INT COMMENT '差异数量',
+    `diff_reason` VARCHAR(32) COMMENT '差异原因：profit-盘盈 loss-盘亏 wrong-错放 missed-漏扫 other-其他',
+    `diff_remark` VARCHAR(500) COMMENT '差异说明',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-待盘点 1-已盘点 2-已确认',
+    `round_no` INT NOT NULL DEFAULT 1 COMMENT '盘点轮次',
+    `count_user_id` BIGINT COMMENT '盘点人ID',
+    `count_user_name` VARCHAR(50) COMMENT '盘点人姓名',
+    `count_time` DATETIME COMMENT '盘点时间',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_order_id` (`order_id`),
+    KEY `idx_sku_code` (`sku_code`),
+    KEY `idx_location_id` (`location_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='盘点明细表';

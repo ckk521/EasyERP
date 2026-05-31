@@ -27,15 +27,15 @@ public interface ReceiveRecordRepository extends BaseMapper<ReceiveRecord> {
     List<ReceiveRecord> findByOrderId(@Param("orderId") Long orderId);
 
     /**
-     * 计算入库明细的总收货数量
+     * 计算入库明细的总收货数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(receive_qty), 0) FROM wms_receive_record WHERE inbound_item_id = #{itemId}")
+    @Select("SELECT COALESCE(SUM(receive_qty), 0) FROM wms_receive_record WHERE inbound_item_id = #{itemId} AND (status IS NULL OR status != 9)")
     Integer sumReceiveQtyByItemId(@Param("itemId") Long itemId);
 
     /**
-     * 计算入库单的总收货数量
+     * 计算入库单的总收货数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(receive_qty), 0) FROM wms_receive_record WHERE inbound_order_id = #{orderId}")
+    @Select("SELECT COALESCE(SUM(receive_qty), 0) FROM wms_receive_record WHERE inbound_order_id = #{orderId} AND (status IS NULL OR status != 9)")
     Integer sumReceiveQtyByOrderId(@Param("orderId") Long orderId);
 
     /**

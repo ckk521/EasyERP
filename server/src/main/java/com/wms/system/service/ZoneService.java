@@ -171,6 +171,19 @@ public class ZoneService {
     }
 
     public void deleteZone(Long id) {
+        BaseZone zone = zoneRepository.selectById(id);
+        if (zone == null) {
+            throw new RuntimeException("库区不存在");
+        }
+
+        // 级联删除：先删除库位，再删除货架配置，最后删除库区
+        // 1. 删除该库区下所有库位
+        jdbcTemplate.update("DELETE FROM base_location WHERE zone_id = ?", id);
+
+        // 2. 删除该库区下所有货架配置
+        jdbcTemplate.update("DELETE FROM base_shelf_config WHERE zone_id = ?", id);
+
+        // 3. 删除库区
         zoneRepository.deleteById(id);
     }
 

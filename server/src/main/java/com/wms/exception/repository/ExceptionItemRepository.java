@@ -20,4 +20,17 @@ public interface ExceptionItemRepository extends BaseMapper<ExceptionItem> {
             "AND status IN (0, 1) " +
             "AND order_id IN (SELECT id FROM wms_exception_order WHERE status IN (0, 1))")
     Integer sumIsolatedQtyByInboundItemId(@Param("inboundItemId") Long inboundItemId);
+
+    /**
+     * 查询入库单已被隔离的总数量
+     *
+     * @param orderId 入库单ID
+     * @return 已隔离数量
+     */
+    @Select("SELECT COALESCE(SUM(ei.exception_qty), 0) FROM wms_exception_item ei " +
+            "JOIN wms_exception_order eo ON ei.order_id = eo.id " +
+            "WHERE eo.inbound_order_id = #{orderId} " +
+            "AND ei.status IN (0, 1) " +
+            "AND eo.status IN (0, 1)")
+    Integer sumIsolatedQtyByOrderId(@Param("orderId") Long orderId);
 }

@@ -44,6 +44,7 @@ public class InspectService {
     private final ReceiveRecordRepository receiveRecordRepository;
     private final ExceptionService exceptionService;
     private final BaseZoneRepository zoneRepository;
+    private final InboundStatusService inboundStatusService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -320,44 +321,8 @@ public class InspectService {
      * 验收后更新入库单状态和进度
      */
     private void updateOrderAfterInspect(Long orderId, InboundOrder order) {
-        // 查询所有明细
-        LambdaQueryWrapper<InboundOrderItem> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(InboundOrderItem::getOrderId, orderId);
-        List<InboundOrderItem> items = itemRepository.selectList(wrapper);
-
-        // 从记录表汇总计算
-        int totalQualified = inspectRecordRepository.sumQualifiedQtyByOrderId(orderId);
-        int totalRejected = inspectRecordRepository.sumRejectedQtyByOrderId(orderId);
-        int totalReceived = receiveRecordRepository.sumReceiveQtyByOrderId(orderId);
-
-        // 计算进度
-        int progress = totalReceived > 0 ? ((totalQualified + totalRejected) * 100 / totalReceived) : 0;
-
-        order.setTotalQualifiedQty(totalQualified);
-        order.setTotalRejectedQty(totalRejected);
-        order.setProgressInspect(progress);
-
-        // 检查是否全部已验收（通过记录表判断）
-        boolean allInspected = items.stream()
-            .allMatch(item -> {
-                Integer received = receiveRecordRepository.sumReceiveQtyByItemId(item.getId());
-                Integer inspected = inspectRecordRepository.sumQualifiedQtyByItemId(item.getId());
-                inspected += inspectRecordRepository.sumRejectedQtyByItemId(item.getId());
-                return inspected >= (received != null ? received : 0);
-            });
-
-        // 状态更新逻辑：
-        // 1. 全部验收完成 -> 待上架(3)
-        // 2. 有合格商品但未全部验收 -> 验收中(2)，允许部分上架
-        // 3. 无合格商品且未全部验收 -> 保持当前状态(收货中)
-        if (allInspected) {
-            order.setStatus(InboundOrder.STATUS_PUTAWAY);
-        } else if (totalQualified > 0) {
-            // 有合格商品，可以开始上架，状态改为验收中
-            order.setStatus(InboundOrder.STATUS_INSPECTING);
-        }
-
-        orderRepository.updateById(order);
+        // 使用统一的状态计算服务更新入库单状态和进度
+        inboundStatusService.recalculateStatus(orderId);
     }
 
     /**

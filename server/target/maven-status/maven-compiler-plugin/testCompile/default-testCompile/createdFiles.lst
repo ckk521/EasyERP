@@ -1,0 +1,3 @@
+com\wms\inventory\service\InventoryServiceTest.class
+com\wms\stocktake\service\StocktakeServiceTest.class
+com\wms\stocktake\controller\StocktakeControllerTest.class

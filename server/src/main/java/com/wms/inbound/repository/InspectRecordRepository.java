@@ -27,27 +27,27 @@ public interface InspectRecordRepository extends BaseMapper<InspectRecord> {
     List<InspectRecord> findByOrderId(@Param("orderId") Long orderId);
 
     /**
-     * 计算入库明细的总合格数量
+     * 计算入库明细的总合格数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(qualified_qty), 0) FROM wms_inspect_record WHERE inbound_item_id = #{itemId}")
+    @Select("SELECT COALESCE(SUM(qualified_qty), 0) FROM wms_inspect_record WHERE inbound_item_id = #{itemId} AND (status IS NULL OR status != 9)")
     Integer sumQualifiedQtyByItemId(@Param("itemId") Long itemId);
 
     /**
-     * 计算入库明细的总不合格数量
+     * 计算入库明细的总不合格数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(rejected_qty), 0) FROM wms_inspect_record WHERE inbound_item_id = #{itemId}")
+    @Select("SELECT COALESCE(SUM(rejected_qty), 0) FROM wms_inspect_record WHERE inbound_item_id = #{itemId} AND (status IS NULL OR status != 9)")
     Integer sumRejectedQtyByItemId(@Param("itemId") Long itemId);
 
     /**
-     * 计算入库单的总合格数量
+     * 计算入库单的总合格数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(qualified_qty), 0) FROM wms_inspect_record WHERE inbound_order_id = #{orderId}")
+    @Select("SELECT COALESCE(SUM(qualified_qty), 0) FROM wms_inspect_record WHERE inbound_order_id = #{orderId} AND (status IS NULL OR status != 9)")
     Integer sumQualifiedQtyByOrderId(@Param("orderId") Long orderId);
 
     /**
-     * 计算入库单的总不合格数量
+     * 计算入库单的总不合格数量（排除已取消记录）
      */
-    @Select("SELECT COALESCE(SUM(rejected_qty), 0) FROM wms_inspect_record WHERE inbound_order_id = #{orderId}")
+    @Select("SELECT COALESCE(SUM(rejected_qty), 0) FROM wms_inspect_record WHERE inbound_order_id = #{orderId} AND (status IS NULL OR status != 9)")
     Integer sumRejectedQtyByOrderId(@Param("orderId") Long orderId);
 
     /**
