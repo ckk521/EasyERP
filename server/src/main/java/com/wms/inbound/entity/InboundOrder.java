@@ -87,6 +87,18 @@ public class InboundOrder {
     /** 关联的异常处理单号 */
     private String refExceptionOrderNo;
 
+    /** 来源出库单ID(调拨入库时填写) */
+    private Long sourceOutboundId;
+
+    /** 来源出库单号 */
+    private String sourceOutboundNo;
+
+    /** 来源退货单ID(客户退货入库时填写) */
+    private Long sourceReturnId;
+
+    /** 来源退货单号 */
+    private String sourceReturnNo;
+
     /** 备注 */
     private String remark;
 
@@ -123,4 +135,5 @@ public class InboundOrder {
     public static final int TYPE_GIFT = 4;           // 赠品入库
     public static final int TYPE_OTHER = 5;          // 其他入库
     public static final int TYPE_REPLACEMENT = 6;    // 补货入库
+    public static final int TYPE_CUSTOMER_RETURN = 7; // 客户退货入库
 }

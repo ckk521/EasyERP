@@ -12,7 +12,11 @@ import ReceivePage from "./pages/inbound/ReceivePage";
 import InspectPage from "./pages/inbound/InspectPage";
 import PutawayPage from "./pages/inbound/PutawayPage";
 import OutboundList from "./pages/outbound/OutboundList";
+import OutboundDetail from "./pages/outbound/OutboundDetail";
 import WaveList from "./pages/outbound/WaveList";
+import PickPage from "./pages/outbound/PickPage";
+import PackPage from "./pages/outbound/PackPage";
+import ShipPage from "./pages/outbound/ShipPage";
 import InventoryList from "./pages/inventory/InventoryList";
 import InventoryManagement from "./pages/inventory/InventoryManagement";
 import StocktakeList from "./pages/inventory/StocktakeList";
@@ -21,7 +25,9 @@ import TransferList from "./pages/inventory/TransferList";
 import ExceptionList from "./pages/exception/ExceptionList";
 import ExceptionDetail from "./pages/exception/ExceptionDetail";
 import ReportOverview from "./pages/reports/ReportOverview";
-import ReturnList from "./pages/return/ReturnList";
+import ReturnOrderList from "./pages/return/ReturnOrderList";
+import ReturnOrderCreate from "./pages/return/ReturnOrderCreate";
+import ReturnOrderDetail from "./pages/return/ReturnOrderDetail";
 import UserList from "./pages/system/UserList";
 import RoleList from "./pages/system/RoleList";
 import SystemConfig from "./pages/system/SystemConfig";
@@ -65,7 +71,11 @@ export const router = createBrowserRouter([
 
       // 出库管理
       { path: "outbound/list", Component: OutboundList },
+      { path: "outbound/:id", Component: OutboundDetail },
       { path: "outbound/wave", Component: WaveList },
+      { path: "outbound/pick", Component: PickPage },
+      { path: "outbound/pack", Component: PackPage },
+      { path: "outbound/ship", Component: ShipPage },
 
       // 库存管理
       { path: "inventory/list", Component: InventoryManagement },
@@ -82,7 +92,10 @@ export const router = createBrowserRouter([
       { path: "reports/overview", Component: ReportOverview },
 
       // 退换货
-      { path: "return/list", Component: ReturnList },
+      { path: "return", Component: ReturnOrderList },
+      { path: "return/list", Component: ReturnOrderList },
+      { path: "return/create", Component: ReturnOrderCreate },
+      { path: "return/:id", Component: ReturnOrderDetail },
 
       // 系统管理
       { path: "system/user", Component: UserList },
