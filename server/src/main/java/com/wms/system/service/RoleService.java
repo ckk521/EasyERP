@@ -9,11 +9,13 @@ import com.wms.system.entity.SysPermission;
 import com.wms.system.entity.SysRole;
 import com.wms.system.entity.SysRolePermission;
 import com.wms.system.entity.SysUser;
+import com.wms.system.entity.SysUserRole;
 import com.wms.system.exception.BusinessException;
 import com.wms.system.repository.SysPermissionRepository;
 import com.wms.system.repository.SysRolePermissionRepository;
 import com.wms.system.repository.SysRoleRepository;
 import com.wms.system.repository.SysUserRepository;
+import com.wms.system.repository.SysUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ public class RoleService {
     private final SysPermissionRepository permissionRepository;
     private final SysRolePermissionRepository rolePermissionRepository;
     private final SysUserRepository userRepository;
+    private final SysUserRoleRepository userRoleRepository;
 
     public Map<String, Object> listRoles(PageDTO pageDTO, String keyword, Integer type, Integer status) {
         Page<SysRole> page = new Page<>(pageDTO.getPage(), pageDTO.getLimit());
@@ -56,11 +59,11 @@ public class RoleService {
         Map<Long, Long> permCountMap = new HashMap<>();
 
         if (!roleIds.isEmpty()) {
-            // 统计用户数
+            // 统计用户数（从关联表查询）
             roleIds.forEach(roleId -> {
-                LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
-                userWrapper.eq(SysUser::getRoleId, roleId);
-                userCountMap.put(roleId, userRepository.selectCount(userWrapper));
+                LambdaQueryWrapper<SysUserRole> userWrapper = new LambdaQueryWrapper<>();
+                userWrapper.eq(SysUserRole::getRoleId, roleId);
+                userCountMap.put(roleId, userRoleRepository.selectCount(userWrapper));
             });
 
             // 统计权限数
@@ -203,10 +206,10 @@ public class RoleService {
             throw new BusinessException(2004, "预置角色不可删除");
         }
 
-        // 检查是否有用户关联
-        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
-        userWrapper.eq(SysUser::getRoleId, id);
-        long userCount = userRepository.selectCount(userWrapper);
+        // 检查是否有用户关联（从关联表查询）
+        LambdaQueryWrapper<SysUserRole> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(SysUserRole::getRoleId, id);
+        long userCount = userRoleRepository.selectCount(userWrapper);
         if (userCount > 0) {
             throw new BusinessException(2005, "该角色下有" + userCount + "个用户，无法删除");
         }

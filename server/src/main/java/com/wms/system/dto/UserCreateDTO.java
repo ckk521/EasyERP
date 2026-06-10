@@ -5,13 +5,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 更新用户DTO
+ * 创建用户DTO
  */
 @Data
-public class UserUpdateDTO {
+public class UserCreateDTO {
 
-    /** 用户ID */
-    private Long id;
+    /** 员工工号 */
+    private String employeeNo;
 
     /** 姓名 */
     private String name;
@@ -45,4 +45,7 @@ public class UserUpdateDTO {
 
     /** 仓库ID列表 */
     private List<Long> warehouseIds;
+
+    /** 密码（可选，不填则使用默认密码） */
+    private String password;
 }

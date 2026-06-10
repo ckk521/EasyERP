@@ -40,6 +40,9 @@ const menuItems = [
     children: [
       { title: "出库单", path: "/outbound/list" },
       { title: "波次管理", path: "/outbound/wave" },
+      { title: "拣货作业", path: "/outbound/pick" },
+      { title: "打包作业", path: "/outbound/pack" },
+      { title: "发货作业", path: "/outbound/ship" },
     ]
   },
   {

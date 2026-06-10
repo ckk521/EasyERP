@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Package, User, Clock, CheckCircle, Truck, Building2 } from "lucide-react";
+import { ArrowLeft, Package, User, Clock, CheckCircle, Truck, Building2, ArrowRightLeft } from "lucide-react";
 import DataTable from "../../components/DataTable";
 import { toast } from "sonner";
 
@@ -49,6 +49,8 @@ interface InboundOrder {
   totalRejectedQty: number;
   totalPutawayQty: number;
   totalReturnQty: number;
+  sourceOutboundId: number | null;
+  sourceOutboundNo: string | null;
   remark: string;
   cancelReason: string;
   createTime: string;

@@ -3,6 +3,7 @@ package com.wms.system.controller;
 import com.wms.system.annotation.OperationLog;
 import com.wms.system.common.Result;
 import com.wms.system.dto.PageDTO;
+import com.wms.system.dto.UserCreateDTO;
 import com.wms.system.dto.UserDTO;
 import com.wms.system.dto.UserUpdateDTO;
 import com.wms.system.service.UserService;
@@ -27,13 +28,15 @@ public class UserController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long roleId,
             @RequestParam(required = false) Long warehouseId,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer department,
+            @RequestParam(required = false) Integer workStatus) {
 
         PageDTO pageDTO = new PageDTO();
         pageDTO.setPage(page);
         pageDTO.setLimit(limit);
 
-        Map<String, Object> data = userService.listUsers(pageDTO, keyword, roleId, warehouseId, status);
+        Map<String, Object> data = userService.listUsers(pageDTO, keyword, roleId, warehouseId, status, department, workStatus);
         return Result.success(data);
     }
 
@@ -44,7 +47,7 @@ public class UserController {
 
     @PostMapping
     @OperationLog(module = "用户管理", action = "CREATE", description = "创建用户")
-    public Result<Map<String, Object>> createUser(@Valid @RequestBody UserDTO dto) {
+    public Result<Map<String, Object>> createUser(@Valid @RequestBody UserCreateDTO dto) {
         Long id = userService.createUser(dto);
         return Result.success("用户创建成功", Map.of("id", id));
     }
@@ -81,8 +84,8 @@ public class UserController {
 
     @PostMapping("/{id}/reset-password")
     @OperationLog(module = "用户管理", action = "RESET_PASSWORD", description = "重置密码")
-    public Result<Void> resetPassword(@PathVariable Long id) {
-        userService.resetPassword(id);
-        return Result.success("重置密码链接已发送到邮箱", null);
+    public Result<Map<String, String>> resetPassword(@PathVariable Long id) {
+        String newPassword = userService.resetPassword(id);
+        return Result.success("密码已重置", Map.of("newPassword", newPassword));
     }
 }
